@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>4 Idiomas — Teste 3</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#172033}
+    .wrap{max-width:920px;margin:auto;padding:18px}
+    h1{margin:0 0 6px;font-size:32px}.note{color:#596579;margin:0 0 16px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .card{background:#fff;border:1px solid #d9deea;border-radius:14px;padding:12px}
+    .label{font-weight:750;font-size:18px;margin-bottom:8px}
+    textarea{width:100%;min-height:125px;padding:12px;font-size:18px;border:1px solid #c7cfdd;border-radius:10px;resize:vertical;background:#fff;color:#172033}
+    textarea:focus{outline:3px solid rgba(37,99,235,.16);border-color:#2563eb}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    button{min-height:48px;border:0;border-radius:10px;padding:0 16px;font-size:16px;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait}
+    #translate{background:#2563eb;color:#fff}.secondary{background:#e8edf6;color:#172033}
+    .status{margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1px solid #d9deea;min-height:48px}
+    .small{font-size:14px;color:#6b7280;margin-top:12px}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}h1{font-size:28px}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <h1>4 Idiomas</h1>
+  <p class="note">Teste 3 — tradução livre em HTTPS. Digite em qualquer caixa e toque em <b>TRADUZIR</b>.</p>
+
+  <section class="grid">
+    <div class="card">
+      <div class="label">🇧🇷 Português</div>
+      <textarea data-lang="pt" data-voice="pt-BR" aria-label="Português"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+    </div>
+    <div class="card">
+      <div class="label">🇺🇸 Inglês</div>
+      <textarea data-lang="en" data-voice="en-US" aria-label="Inglês"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+    </div>
+    <div class="card">
+      <div class="label">🇫🇷 Francês</div>
+      <textarea data-lang="fr" data-voice="fr-FR" aria-label="Francês"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+    </div>
+    <div class="card">
+      <div class="label">🇪🇸 Espanhol</div>
+      <textarea data-lang="es" data-voice="es-ES" aria-label="Espanhol"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+    </div>
+  </section>
+
+  <div class="row">
+    <button id="translate">🌐 TRADUZIR</button>
+    <button id="clear" class="secondary">Limpar</button>
+  </div>
+  <div id="status" class="status">Pronto. Toque em uma caixa e escreva uma frase.</div>
+  <p class="small">Este teste usa o serviço externo MyMemory e precisa de internet. Não há frases pré-programadas.</p>
+</main>
+
+<script>
+(() => {
+  const boxes = [...document.querySelectorAll('textarea[data-lang]')];
+  const translateBtn = document.querySelector('#translate');
+  const status = document.querySelector('#status');
+  let active = boxes[0];
+
+  boxes.forEach(box => {
+    box.addEventListener('focus', () => {
+      active = box;
+      const nome = box.getAttribute('aria-label');
+      status.textContent = 'Entrada selecionada: ' + nome + '.';
+    });
+  });
+
+  function decodeHtml(text) {
+    const t = document.createElement('textarea');
+    t.innerHTML = text;
+    return t.value;
+  }
+
+  async function translate(text, source, target) {
+    const url = 'https://api.mymemory.translated.net/get?q=' +
+      encodeURIComponent(text) + '&langpair=' + encodeURIComponent(source + '|' + target);
+    const response = await fetch(url, { method: 'GET' });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    const translated = data?.responseData?.translatedText;
+    if (!translated) throw new Error(data?.responseDetails || 'Sem tradução');
+    return decodeHtml(translated);
+  }
+
+  translateBtn.addEventListener('click', async () => {
+    const text = active.value.trim();
+    if (!text) {
+      status.textContent = 'Digite uma palavra ou frase primeiro.';
+      active.focus();
+      return;
+    }
+
+    const source = active.dataset.lang;
+    const targets = boxes.filter(b => b !== active);
+    translateBtn.disabled = true;
+    status.textContent = 'Traduzindo…';
+
+    try {
+      const results = await Promise.all(
+        targets.map(b => translate(text, source, b.dataset.lang))
+      );
+      targets.forEach((b, i) => b.value = results[i]);
+      status.textContent = '✓ Tradução concluída.';
+    } catch (err) {
+      status.textContent = 'Não foi possível traduzir. ' + (err?.message || 'Erro desconhecido') + '. Verifique a internet e tente novamente.';
+    } finally {
+      translateBtn.disabled = false;
+    }
+  });
+
+  document.querySelector('#clear').addEventListener('click', () => {
+    boxes.forEach(b => b.value = '');
+    active = boxes[0];
+    status.textContent = 'Campos limpos.';
+  });
+
+  document.querySelectorAll('.speak').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const box = btn.closest('.card').querySelector('textarea');
+      const text = box.value.trim();
+      if (!text) {
+        status.textContent = 'Não há texto nessa caixa para ouvir.';
+        return;
+      }
+      if (!('speechSynthesis' in window)) {
+        status.textContent = 'A leitura em voz alta não está disponível neste navegador.';
+        return;
+      }
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = box.dataset.voice;
+      utterance.rate = 0.9;
+      speechSynthesis.speak(utterance);
+      status.textContent = '🔊 Reproduzindo pronúncia.';
+    });
+  });
+})();
+</script>
+</body>
+</html>
