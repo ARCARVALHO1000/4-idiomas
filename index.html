@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#2563eb" />
-  <title>4 Idiomas — Teste 3</title>
+  <title>4 Idiomas — Teste 4</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#172033}
@@ -18,7 +18,7 @@
     .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
     button{min-height:48px;border:0;border-radius:10px;padding:0 16px;font-size:16px;font-weight:700;cursor:pointer}
     button:disabled{opacity:.6;cursor:wait}
-    #translate{background:#2563eb;color:#fff}.secondary{background:#e8edf6;color:#172033}
+    #translate{background:#2563eb;color:#fff}.secondary{background:#e8edf6;color:#172033}.mic{background:#eef2ff;color:#1e3a8a}
     .status{margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1px solid #d9deea;min-height:48px}
     .small{font-size:14px;color:#6b7280;margin-top:12px}
     @media(max-width:650px){.grid{grid-template-columns:1fr}h1{font-size:28px}}
@@ -27,28 +27,40 @@
 <body>
 <main class="wrap">
   <h1>4 Idiomas</h1>
-  <p class="note">Teste 3 — tradução livre em HTTPS. Digite em qualquer caixa e toque em <b>TRADUZIR</b>.</p>
+  <p class="note">Teste 4 — tradução + pronúncia + entrada por voz. Digite ou toque em <b>🎤 Falar</b>, depois toque em <b>🌐 TRADUZIR</b>.</p>
 
   <section class="grid">
     <div class="card">
       <div class="label">🇧🇷 Português</div>
       <textarea data-lang="pt" data-voice="pt-BR" aria-label="Português"></textarea>
-      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+      <div class="row">
+        <button class="secondary speak">🔊 Ouvir</button>
+        <button class="mic listen">🎤 Falar</button>
+      </div>
     </div>
     <div class="card">
       <div class="label">🇺🇸 Inglês</div>
       <textarea data-lang="en" data-voice="en-US" aria-label="Inglês"></textarea>
-      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+      <div class="row">
+        <button class="secondary speak">🔊 Ouvir</button>
+        <button class="mic listen">🎤 Falar</button>
+      </div>
     </div>
     <div class="card">
       <div class="label">🇫🇷 Francês</div>
       <textarea data-lang="fr" data-voice="fr-FR" aria-label="Francês"></textarea>
-      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+      <div class="row">
+        <button class="secondary speak">🔊 Ouvir</button>
+        <button class="mic listen">🎤 Falar</button>
+      </div>
     </div>
     <div class="card">
       <div class="label">🇪🇸 Espanhol</div>
       <textarea data-lang="es" data-voice="es-ES" aria-label="Espanhol"></textarea>
-      <div class="row"><button class="secondary speak">🔊 Ouvir</button></div>
+      <div class="row">
+        <button class="secondary speak">🔊 Ouvir</button>
+        <button class="mic listen">🎤 Falar</button>
+      </div>
     </div>
   </section>
 
@@ -56,8 +68,8 @@
     <button id="translate">🌐 TRADUZIR</button>
     <button id="clear" class="secondary">Limpar</button>
   </div>
-  <div id="status" class="status">Pronto. Toque em uma caixa e escreva uma frase.</div>
-  <p class="small">Este teste usa o serviço externo MyMemory e precisa de internet. Não há frases pré-programadas.</p>
+  <div id="status" class="status">Pronto. Digite ou use 🎤 Falar em qualquer idioma.</div>
+  <p class="small">A tradução usa o serviço externo MyMemory e precisa de internet. O microfone depende do suporte do navegador e pode pedir permissão na primeira utilização.</p>
 </main>
 
 <script>
@@ -66,12 +78,15 @@
   const translateBtn = document.querySelector('#translate');
   const status = document.querySelector('#status');
   let active = boxes[0];
+  let recognition = null;
+  let listeningButton = null;
+
+  const languageName = (box) => box.getAttribute('aria-label');
 
   boxes.forEach(box => {
     box.addEventListener('focus', () => {
       active = box;
-      const nome = box.getAttribute('aria-label');
-      status.textContent = 'Entrada selecionada: ' + nome + '.';
+      status.textContent = 'Entrada selecionada: ' + languageName(box) + '.';
     });
   });
 
@@ -95,7 +110,7 @@
   translateBtn.addEventListener('click', async () => {
     const text = active.value.trim();
     if (!text) {
-      status.textContent = 'Digite uma palavra ou frase primeiro.';
+      status.textContent = 'Digite uma palavra ou frase primeiro, ou use 🎤 Falar.';
       active.focus();
       return;
     }
@@ -103,7 +118,7 @@
     const source = active.dataset.lang;
     const targets = boxes.filter(b => b !== active);
     translateBtn.disabled = true;
-    status.textContent = 'Traduzindo…';
+    status.textContent = '🌐 Traduzindo a partir de ' + languageName(active) + '…';
 
     try {
       const results = await Promise.all(
@@ -119,9 +134,13 @@
   });
 
   document.querySelector('#clear').addEventListener('click', () => {
+    if (recognition) {
+      try { recognition.abort(); } catch (_) {}
+      recognition = null;
+    }
     boxes.forEach(b => b.value = '');
     active = boxes[0];
-    status.textContent = 'Campos limpos.';
+    status.textContent = 'Campos limpos. Pronto.';
   });
 
   document.querySelectorAll('.speak').forEach(btn => {
@@ -140,8 +159,83 @@
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = box.dataset.voice;
       utterance.rate = 0.9;
+      utterance.onstart = () => {
+        status.textContent = '🔊 Ouvindo ' + languageName(box) + '…';
+      };
+      utterance.onend = () => {
+        status.textContent = '✓ Pronúncia concluída. Pronto.';
+      };
+      utterance.onerror = () => {
+        status.textContent = 'Não foi possível reproduzir a pronúncia.';
+      };
       speechSynthesis.speak(utterance);
-      status.textContent = '🔊 Reproduzindo pronúncia.';
+    });
+  });
+
+  document.querySelectorAll('.listen').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const box = btn.closest('.card').querySelector('textarea');
+      active = box;
+
+      if (!SpeechRecognition) {
+        status.textContent = '🎤 O reconhecimento de voz não está disponível neste navegador. Tente usar o Chrome atualizado.';
+        return;
+      }
+
+      if (recognition) {
+        try { recognition.abort(); } catch (_) {}
+        recognition = null;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = box.dataset.voice;
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      listeningButton = btn;
+      btn.disabled = true;
+
+      recognition.onstart = () => {
+        status.textContent = '🎤 Ouvindo ' + languageName(box) + '… Fale agora.';
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+        if (transcript) {
+          box.value = transcript;
+          status.textContent = '✓ Voz reconhecida: ' + transcript + '. Agora toque em 🌐 TRADUZIR.';
+        } else {
+          status.textContent = 'Não consegui entender. Toque em 🎤 Falar e tente novamente.';
+        }
+      };
+
+      recognition.onerror = (event) => {
+        const code = event.error || '';
+        if (code === 'not-allowed' || code === 'service-not-allowed') {
+          status.textContent = 'Permissão do microfone bloqueada. Autorize o microfone para este site nas configurações do navegador.';
+        } else if (code === 'no-speech') {
+          status.textContent = 'Não ouvi nenhuma fala. Toque em 🎤 Falar e tente novamente.';
+        } else if (code === 'network') {
+          status.textContent = 'Falha de rede no reconhecimento de voz. Verifique a internet e tente novamente.';
+        } else {
+          status.textContent = 'Não foi possível reconhecer a voz (' + code + '). Tente novamente.';
+        }
+      };
+
+      recognition.onend = () => {
+        if (listeningButton) listeningButton.disabled = false;
+        recognition = null;
+        listeningButton = null;
+      };
+
+      try {
+        recognition.start();
+      } catch (_) {
+        btn.disabled = false;
+        recognition = null;
+        status.textContent = 'Não foi possível iniciar o microfone. Tente novamente.';
+      }
     });
   });
 })();
