@@ -4,72 +4,113 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#2563eb" />
-  <title>4 Idiomas — Teste 4</title>
+  <title>4 Idiomas — Teste 4.1</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#172033}
-    .wrap{max-width:920px;margin:auto;padding:18px}
-    h1{margin:0 0 6px;font-size:32px}.note{color:#596579;margin:0 0 16px}
+    .wrap{max-width:1040px;margin:auto;padding:18px}
+    h1{margin:0 0 6px;font-size:32px}.note{color:#596579;margin:0 0 16px;line-height:1.45}
+    .meta,.toolbar,.panel{background:#fff;border:1px solid #d9deea;border-radius:14px;padding:12px;margin-bottom:12px}
+    .meta-grid{display:grid;grid-template-columns:2fr 2fr 1fr;gap:10px}
+    label{font-weight:700;font-size:14px;display:block;margin-bottom:5px}
+    input,select{width:100%;min-height:44px;border:1px solid #c7cfdd;border-radius:9px;padding:9px 10px;font-size:16px;background:#fff;color:#172033}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .card{background:#fff;border:1px solid #d9deea;border-radius:14px;padding:12px}
-    .label{font-weight:750;font-size:18px;margin-bottom:8px}
-    textarea{width:100%;min-height:125px;padding:12px;font-size:18px;border:1px solid #c7cfdd;border-radius:10px;resize:vertical;background:#fff;color:#172033}
-    textarea:focus{outline:3px solid rgba(37,99,235,.16);border-color:#2563eb}
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    button{min-height:48px;border:0;border-radius:10px;padding:0 16px;font-size:16px;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.6;cursor:wait}
-    #translate{background:#2563eb;color:#fff}.secondary{background:#e8edf6;color:#172033}.mic{background:#eef2ff;color:#1e3a8a}
-    .status{margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1px solid #d9deea;min-height:48px}
-    .small{font-size:14px;color:#6b7280;margin-top:12px}
-    @media(max-width:650px){.grid{grid-template-columns:1fr}h1{font-size:28px}}
+    .label{font-weight:750;font-size:18px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+    .count{font-size:12px;color:#6b7280;font-weight:600}
+    textarea{width:100%;min-height:245px;padding:12px;font-size:17px;line-height:1.5;border:1px solid #c7cfdd;border-radius:10px;resize:vertical;background:#fff;color:#172033}
+    textarea:focus,input:focus,select:focus{outline:3px solid rgba(37,99,235,.16);border-color:#2563eb}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button{min-height:46px;border:0;border-radius:10px;padding:0 15px;font-size:15px;font-weight:750;cursor:pointer}
+    button:disabled{opacity:.55;cursor:wait}
+    .primary{background:#2563eb;color:#fff}.secondary{background:#e8edf6;color:#172033}.mic{background:#eef2ff;color:#1e3a8a}.save{background:#0f766e;color:#fff}.print{background:#7c3aed;color:#fff}.exercise{background:#b45309;color:#fff}.danger{background:#fee2e2;color:#991b1b}
+    .status{margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1px solid #d9deea;min-height:48px;white-space:pre-line}
+    .small{font-size:13px;color:#6b7280;line-height:1.45}
+    .progress{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px;display:none}.bar{height:100%;width:0;background:#2563eb;transition:width .2s}
+    details{background:#fff;border:1px solid #d9deea;border-radius:14px;padding:10px 12px;margin-top:12px}
+    summary{cursor:pointer;font-weight:800}
+    .book-list{display:grid;gap:8px;margin-top:10px}.book-item{border:1px solid #e1e5ee;border-radius:10px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.book-item strong{display:block}.book-meta{font-size:12px;color:#6b7280;margin-top:3px}.book-actions{display:flex;gap:6px;flex-wrap:wrap}.book-actions button{min-height:38px;padding:0 10px;font-size:13px}
+    .exercise-box{margin-top:10px;border:1px dashed #c7cfdd;border-radius:10px;padding:12px}.exercise-q{font-weight:750;margin-bottom:8px}.answer{margin-top:8px;padding:10px;border-radius:8px;background:#f3f4f6;display:none;white-space:pre-wrap}.exercise-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    #printView{display:none}
+    @media(max-width:760px){.grid,.meta-grid{grid-template-columns:1fr}h1{font-size:28px}textarea{min-height:190px}}
+    @media print{
+      body{background:#fff;color:#000}.wrap>*{display:none!important}#printView{display:block!important;padding:0;margin:0}.print-page{page-break-after:always}.print-page:last-child{page-break-after:auto}.print-title{font-size:22pt;margin:0 0 4mm}.print-meta{font-size:10pt;color:#444;margin-bottom:7mm}.print-text{font-size:12pt;line-height:1.55;white-space:pre-wrap}.print-lang{font-size:10pt;font-weight:700;margin-bottom:3mm;text-transform:uppercase;letter-spacing:.04em}
+    }
   </style>
 </head>
 <body>
 <main class="wrap">
   <h1>4 Idiomas</h1>
-  <p class="note">Teste 4 — tradução + pronúncia + entrada por voz. Digite ou toque em <b>🎤 Falar</b>, depois toque em <b>🌐 TRADUZIR</b>.</p>
+  <p class="note">Teste 4.1 — textos longos, tradução em blocos, voz, pronúncia, Caderno, exercícios e impressão por idioma.</p>
 
-  <section class="grid">
-    <div class="card">
-      <div class="label">🇧🇷 Português</div>
-      <textarea data-lang="pt" data-voice="pt-BR" aria-label="Português"></textarea>
-      <div class="row">
-        <button class="secondary speak">🔊 Ouvir</button>
-        <button class="mic listen">🎤 Falar</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="label">🇺🇸 Inglês</div>
-      <textarea data-lang="en" data-voice="en-US" aria-label="Inglês"></textarea>
-      <div class="row">
-        <button class="secondary speak">🔊 Ouvir</button>
-        <button class="mic listen">🎤 Falar</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="label">🇫🇷 Francês</div>
-      <textarea data-lang="fr" data-voice="fr-FR" aria-label="Francês"></textarea>
-      <div class="row">
-        <button class="secondary speak">🔊 Ouvir</button>
-        <button class="mic listen">🎤 Falar</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="label">🇪🇸 Espanhol</div>
-      <textarea data-lang="es" data-voice="es-ES" aria-label="Espanhol"></textarea>
-      <div class="row">
-        <button class="secondary speak">🔊 Ouvir</button>
-        <button class="mic listen">🎤 Falar</button>
-      </div>
+  <section class="meta">
+    <div class="meta-grid">
+      <div><label for="title">Título do artigo</label><input id="title" placeholder="Ex.: A importância da leitura" /></div>
+      <div><label for="theme">Tema</label><input id="theme" placeholder="Ex.: Educação, família, ciência..." /></div>
+      <div><label for="articleDate">Data</label><input id="articleDate" type="date" /></div>
     </div>
   </section>
 
-  <div class="row">
-    <button id="translate">🌐 TRADUZIR</button>
-    <button id="clear" class="secondary">Limpar</button>
-  </div>
-  <div id="status" class="status">Pronto. Digite ou use 🎤 Falar em qualquer idioma.</div>
-  <p class="small">A tradução usa o serviço externo MyMemory e precisa de internet. O microfone depende do suporte do navegador e pode pedir permissão na primeira utilização.</p>
+  <section class="grid">
+    <div class="card">
+      <div class="label"><span>🇧🇷 Português</span><span class="count" data-count="pt">0 caracteres</span></div>
+      <textarea data-lang="pt" data-voice="pt-BR" aria-label="Português"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button><button class="mic listen">🎤 Falar</button></div>
+    </div>
+    <div class="card">
+      <div class="label"><span>🇺🇸 Inglês</span><span class="count" data-count="en">0 caracteres</span></div>
+      <textarea data-lang="en" data-voice="en-US" aria-label="Inglês"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button><button class="mic listen">🎤 Falar</button></div>
+    </div>
+    <div class="card">
+      <div class="label"><span>🇫🇷 Francês</span><span class="count" data-count="fr">0 caracteres</span></div>
+      <textarea data-lang="fr" data-voice="fr-FR" aria-label="Francês"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button><button class="mic listen">🎤 Falar</button></div>
+    </div>
+    <div class="card">
+      <div class="label"><span>🇪🇸 Espanhol</span><span class="count" data-count="es">0 caracteres</span></div>
+      <textarea data-lang="es" data-voice="es-ES" aria-label="Espanhol"></textarea>
+      <div class="row"><button class="secondary speak">🔊 Ouvir</button><button class="mic listen">🎤 Falar</button></div>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <div class="row">
+      <button id="translate" class="primary">🌐 TRADUZIR</button>
+      <button id="saveArticle" class="save">⭐ SALVAR NO CADERNO</button>
+      <button id="printBtn" class="print">🖨️ IMPRIMIR</button>
+      <button id="exerciseBtn" class="exercise">🧠 EXERCÍCIOS</button>
+      <button id="clear" class="secondary">Limpar</button>
+    </div>
+    <div class="progress" id="progress"><div class="bar" id="bar"></div></div>
+    <div id="status" class="status">Pronto. Cole um artigo em qualquer idioma, ou use 🎤 Falar.</div>
+    <p class="small">Textos longos são divididos automaticamente em blocos menores. A tradução usa o serviço gratuito MyMemory e requer internet; em textos maiores o processo pode levar algum tempo.</p>
+  </section>
+
+  <details id="printPanel">
+    <summary>🖨️ Opções de impressão</summary>
+    <div class="row" style="align-items:end">
+      <div style="min-width:240px;flex:1"><label for="printLang">Idioma para imprimir</label><select id="printLang"><option value="pt">🇧🇷 Português</option><option value="en">🇺🇸 Inglês</option><option value="fr">🇫🇷 Francês</option><option value="es">🇪🇸 Espanhol</option><option value="all">🌍 Os 4 idiomas</option></select></div>
+      <button id="doPrint" class="print">Abrir impressão / Salvar PDF</button>
+    </div>
+  </details>
+
+  <details id="bookPanel">
+    <summary>⭐ Caderno de artigos</summary>
+    <div id="bookList" class="book-list"></div>
+  </details>
+
+  <details id="exercisePanel">
+    <summary>🧠 Exercícios do artigo atual</summary>
+    <div class="row" style="align-items:end">
+      <div style="min-width:220px;flex:1"><label for="exerciseType">Tipo de exercício</label><select id="exerciseType"><option value="translate">Traduzir um trecho</option><option value="complete">Completar uma frase</option><option value="surprise">Surpreenda-me</option></select></div>
+      <div style="min-width:200px;flex:1"><label for="exerciseLang">Idioma de estudo</label><select id="exerciseLang"><option value="en">🇺🇸 Inglês</option><option value="fr">🇫🇷 Francês</option><option value="es">🇪🇸 Espanhol</option><option value="pt">🇧🇷 Português</option></select></div>
+      <button id="newExercise" class="exercise">Gerar exercício</button>
+    </div>
+    <div id="exerciseBox" class="exercise-box"><div class="small">Salve ou traduza um artigo e toque em “Gerar exercício”.</div></div>
+  </details>
+
+  <section id="printView"></section>
 </main>
 
 <script>
@@ -77,167 +118,211 @@
   const boxes = [...document.querySelectorAll('textarea[data-lang]')];
   const translateBtn = document.querySelector('#translate');
   const status = document.querySelector('#status');
+  const titleEl = document.querySelector('#title');
+  const themeEl = document.querySelector('#theme');
+  const dateEl = document.querySelector('#articleDate');
+  const progress = document.querySelector('#progress');
+  const bar = document.querySelector('#bar');
+  const bookList = document.querySelector('#bookList');
+  const printView = document.querySelector('#printView');
   let active = boxes[0];
   let recognition = null;
   let listeningButton = null;
+  const BOOK_KEY = 'quatroIdiomasCadernoV1';
+  const langNames = {pt:'Português',en:'Inglês',fr:'Francês',es:'Espanhol'};
+  const langFlags = {pt:'🇧🇷',en:'🇺🇸',fr:'🇫🇷',es:'🇪🇸'};
 
-  const languageName = (box) => box.getAttribute('aria-label');
+  dateEl.value = new Date().toISOString().slice(0,10);
 
+  const languageName = box => box.getAttribute('aria-label');
+  const normalize = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+  function updateCounts(){
+    boxes.forEach(b=>{
+      const el=document.querySelector('[data-count="'+b.dataset.lang+'"]');
+      if(el) el.textContent=b.value.length+' caracteres';
+    });
+  }
   boxes.forEach(box => {
-    box.addEventListener('focus', () => {
-      active = box;
-      status.textContent = 'Entrada selecionada: ' + languageName(box) + '.';
-    });
+    box.addEventListener('focus', () => { active = box; status.textContent = 'Entrada selecionada: ' + languageName(box) + '.'; });
+    box.addEventListener('input', updateCounts);
   });
 
-  function decodeHtml(text) {
-    const t = document.createElement('textarea');
-    t.innerHTML = text;
-    return t.value;
+  function decodeHtml(text){ const t=document.createElement('textarea'); t.innerHTML=text; return t.value; }
+
+  function splitText(text, maxLen=420){
+    const clean=(text||'').replace(/\r/g,'').trim();
+    if(clean.length<=maxLen) return clean?[clean]:[];
+    const paras=clean.split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
+    const chunks=[];
+    for(const para of paras.length?paras:[clean]){
+      if(para.length<=maxLen){chunks.push(para);continue;}
+      const sentences=para.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)||[para];
+      let current='';
+      for(const s0 of sentences){
+        const s=s0.trim();
+        if(!s) continue;
+        if(s.length>maxLen){
+          if(current){chunks.push(current.trim());current='';}
+          for(let i=0;i<s.length;i+=maxLen) chunks.push(s.slice(i,i+maxLen).trim());
+        }else if((current+' '+s).trim().length>maxLen){
+          if(current) chunks.push(current.trim());
+          current=s;
+        }else current=(current+' '+s).trim();
+      }
+      if(current) chunks.push(current.trim());
+    }
+    return chunks.filter(Boolean);
   }
 
-  async function translate(text, source, target) {
-    const url = 'https://api.mymemory.translated.net/get?q=' +
-      encodeURIComponent(text) + '&langpair=' + encodeURIComponent(source + '|' + target);
-    const response = await fetch(url, { method: 'GET' });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const data = await response.json();
-    const translated = data?.responseData?.translatedText;
-    if (!translated) throw new Error(data?.responseDetails || 'Sem tradução');
-    return decodeHtml(translated);
+  async function translateChunk(text, source, target){
+    let last='';
+    for(let attempt=1;attempt<=3;attempt++){
+      const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+encodeURIComponent(source+'|'+target);
+      const response=await fetch(url,{method:'GET',cache:'no-store'});
+      if(!response.ok) throw new Error('HTTP '+response.status);
+      const data=await response.json();
+      const translated=decodeHtml(data?.responseData?.translatedText||'').trim();
+      if(!translated) throw new Error(data?.responseDetails||'Sem tradução');
+      last=translated;
+      const same=normalize(translated)===normalize(text);
+      const meaningful=(text.match(/[A-Za-zÀ-ÿ]/g)||[]).length>8;
+      if(!(same && meaningful && source!==target)) return translated;
+      await sleep(350*attempt);
+    }
+    throw new Error('o serviço devolveu o texto original sem traduzir');
   }
 
-  translateBtn.addEventListener('click', async () => {
-    const text = active.value.trim();
-    if (!text) {
-      status.textContent = 'Digite uma palavra ou frase primeiro, ou use 🎤 Falar.';
-      active.focus();
-      return;
+  async function translateLong(text, source, target, onStep){
+    const chunks=splitText(text);
+    const out=[];
+    for(let i=0;i<chunks.length;i++){
+      const translated=await translateChunk(chunks[i],source,target);
+      out.push(translated);
+      onStep?.(i+1,chunks.length);
+      await sleep(220);
     }
+    return out.join('\n\n');
+  }
 
-    const source = active.dataset.lang;
-    const targets = boxes.filter(b => b !== active);
-    translateBtn.disabled = true;
-    status.textContent = '🌐 Traduzindo a partir de ' + languageName(active) + '…';
-
-    try {
-      const results = await Promise.all(
-        targets.map(b => translate(text, source, b.dataset.lang))
-      );
-      targets.forEach((b, i) => b.value = results[i]);
-      status.textContent = '✓ Tradução concluída.';
-    } catch (err) {
-      status.textContent = 'Não foi possível traduzir. ' + (err?.message || 'Erro desconhecido') + '. Verifique a internet e tente novamente.';
-    } finally {
-      translateBtn.disabled = false;
+  translateBtn.addEventListener('click', async()=>{
+    const text=active.value.trim();
+    if(!text){status.textContent='Digite ou cole um texto primeiro, ou use 🎤 Falar.';active.focus();return;}
+    const source=active.dataset.lang;
+    const targets=boxes.filter(b=>b!==active);
+    translateBtn.disabled=true; progress.style.display='block'; bar.style.width='0%';
+    let completed=0; const totalTargets=targets.length;
+    try{
+      for(const target of targets){
+        status.textContent='🌐 Traduzindo para '+languageName(target)+'…';
+        const translated=await translateLong(text,source,target.dataset.lang,(done,total)=>{
+          const targetPart=(done/total)/totalTargets;
+          const pct=Math.round(((completed/totalTargets)+targetPart)*100);
+          bar.style.width=Math.min(100,pct)+'%';
+          status.textContent='🌐 Traduzindo para '+languageName(target)+' — bloco '+done+' de '+total+'…';
+        });
+        target.value=translated; completed++; updateCounts();
+        bar.style.width=Math.round((completed/totalTargets)*100)+'%';
+      }
+      status.textContent='✓ Tradução concluída nos quatro idiomas.';
+    }catch(err){
+      status.textContent='⚠️ Tradução interrompida: '+(err?.message||'erro desconhecido')+'. O que já foi traduzido foi mantido. Tente novamente em alguns segundos.';
+    }finally{
+      translateBtn.disabled=false; setTimeout(()=>{progress.style.display='none';bar.style.width='0%';},900);
     }
   });
 
-  document.querySelector('#clear').addEventListener('click', () => {
-    if (recognition) {
-      try { recognition.abort(); } catch (_) {}
-      recognition = null;
-    }
-    boxes.forEach(b => b.value = '');
-    active = boxes[0];
-    status.textContent = 'Campos limpos. Pronto.';
+  document.querySelector('#clear').addEventListener('click',()=>{
+    if(recognition){try{recognition.abort();}catch(_){ } recognition=null;}
+    boxes.forEach(b=>b.value=''); titleEl.value=''; themeEl.value=''; dateEl.value=new Date().toISOString().slice(0,10); active=boxes[0]; updateCounts(); status.textContent='Campos limpos. Pronto.';
   });
 
-  document.querySelectorAll('.speak').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const box = btn.closest('.card').querySelector('textarea');
-      const text = box.value.trim();
-      if (!text) {
-        status.textContent = 'Não há texto nessa caixa para ouvir.';
-        return;
-      }
-      if (!('speechSynthesis' in window)) {
-        status.textContent = 'A leitura em voz alta não está disponível neste navegador.';
-        return;
-      }
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = box.dataset.voice;
-      utterance.rate = 0.9;
-      utterance.onstart = () => {
-        status.textContent = '🔊 Ouvindo ' + languageName(box) + '…';
-      };
-      utterance.onend = () => {
-        status.textContent = '✓ Pronúncia concluída. Pronto.';
-      };
-      utterance.onerror = () => {
-        status.textContent = 'Não foi possível reproduzir a pronúncia.';
-      };
-      speechSynthesis.speak(utterance);
+  document.querySelectorAll('.speak').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const box=btn.closest('.card').querySelector('textarea'); const text=box.value.trim();
+      if(!text){status.textContent='Não há texto nessa caixa para ouvir.';return;}
+      if(!('speechSynthesis' in window)){status.textContent='A leitura em voz alta não está disponível neste navegador.';return;}
+      speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=box.dataset.voice;u.rate=.9;
+      u.onstart=()=>status.textContent='🔊 Ouvindo '+languageName(box)+'…';
+      u.onend=()=>status.textContent='✓ Pronúncia concluída. Pronto.';
+      u.onerror=()=>status.textContent='Não foi possível reproduzir a pronúncia.';
+      speechSynthesis.speak(u);
     });
   });
 
-  document.querySelectorAll('.listen').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const box = btn.closest('.card').querySelector('textarea');
-      active = box;
-
-      if (!SpeechRecognition) {
-        status.textContent = '🎤 O reconhecimento de voz não está disponível neste navegador. Tente usar o Chrome atualizado.';
-        return;
-      }
-
-      if (recognition) {
-        try { recognition.abort(); } catch (_) {}
-        recognition = null;
-      }
-
-      recognition = new SpeechRecognition();
-      recognition.lang = box.dataset.voice;
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      listeningButton = btn;
-      btn.disabled = true;
-
-      recognition.onstart = () => {
-        status.textContent = '🎤 Ouvindo ' + languageName(box) + '… Fale agora.';
-      };
-
-      recognition.onresult = (event) => {
-        const transcript = event.results?.[0]?.[0]?.transcript?.trim();
-        if (transcript) {
-          box.value = transcript;
-          status.textContent = '✓ Voz reconhecida: ' + transcript + '. Agora toque em 🌐 TRADUZIR.';
-        } else {
-          status.textContent = 'Não consegui entender. Toque em 🎤 Falar e tente novamente.';
-        }
-      };
-
-      recognition.onerror = (event) => {
-        const code = event.error || '';
-        if (code === 'not-allowed' || code === 'service-not-allowed') {
-          status.textContent = 'Permissão do microfone bloqueada. Autorize o microfone para este site nas configurações do navegador.';
-        } else if (code === 'no-speech') {
-          status.textContent = 'Não ouvi nenhuma fala. Toque em 🎤 Falar e tente novamente.';
-        } else if (code === 'network') {
-          status.textContent = 'Falha de rede no reconhecimento de voz. Verifique a internet e tente novamente.';
-        } else {
-          status.textContent = 'Não foi possível reconhecer a voz (' + code + '). Tente novamente.';
-        }
-      };
-
-      recognition.onend = () => {
-        if (listeningButton) listeningButton.disabled = false;
-        recognition = null;
-        listeningButton = null;
-      };
-
-      try {
-        recognition.start();
-      } catch (_) {
-        btn.disabled = false;
-        recognition = null;
-        status.textContent = 'Não foi possível iniciar o microfone. Tente novamente.';
-      }
+  document.querySelectorAll('.listen').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition; const box=btn.closest('.card').querySelector('textarea');active=box;
+      if(!SR){status.textContent='🎤 O reconhecimento de voz não está disponível neste navegador. Tente usar o Chrome atualizado.';return;}
+      if(recognition){try{recognition.abort();}catch(_){ } recognition=null;}
+      recognition=new SR(); recognition.lang=box.dataset.voice; recognition.continuous=false; recognition.interimResults=false; recognition.maxAlternatives=1; listeningButton=btn; btn.disabled=true;
+      recognition.onstart=()=>status.textContent='🎤 Ouvindo '+languageName(box)+'… Fale agora.';
+      recognition.onresult=e=>{const transcript=e.results?.[0]?.[0]?.transcript?.trim();if(transcript){box.value=transcript;updateCounts();status.textContent='✓ Voz reconhecida: '+transcript+'. Agora toque em 🌐 TRADUZIR.';}else status.textContent='Não consegui entender. Tente novamente.';};
+      recognition.onerror=e=>{const c=e.error||'';if(c==='not-allowed'||c==='service-not-allowed')status.textContent='Permissão do microfone bloqueada. Autorize o microfone para este site.';else if(c==='no-speech')status.textContent='Não ouvi nenhuma fala. Tente novamente.';else if(c==='network')status.textContent='Falha de rede no reconhecimento de voz.';else status.textContent='Não foi possível reconhecer a voz ('+c+').';};
+      recognition.onend=()=>{if(listeningButton)listeningButton.disabled=false;recognition=null;listeningButton=null;};
+      try{recognition.start();}catch(_){btn.disabled=false;recognition=null;status.textContent='Não foi possível iniciar o microfone.';}
     });
   });
+
+  function getTexts(){const o={};boxes.forEach(b=>o[b.dataset.lang]=b.value.trim());return o;}
+  function setTexts(texts){boxes.forEach(b=>b.value=texts?.[b.dataset.lang]||'');updateCounts();}
+  function getBook(){try{return JSON.parse(localStorage.getItem(BOOK_KEY)||'[]');}catch(_){return[];}}
+  function setBook(items){localStorage.setItem(BOOK_KEY,JSON.stringify(items));renderBook();}
+  function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  document.querySelector('#saveArticle').addEventListener('click',()=>{
+    const texts=getTexts(); if(!Object.values(texts).some(Boolean)){status.textContent='Não há artigo para salvar.';return;}
+    const items=getBook(); const id=Date.now();
+    items.unshift({id,title:titleEl.value.trim()||'Artigo sem título',theme:themeEl.value.trim(),date:dateEl.value||new Date().toISOString().slice(0,10),texts});
+    setBook(items.slice(0,100)); status.textContent='⭐ Artigo salvo no Caderno com as quatro versões.'; document.querySelector('#bookPanel').open=true;
+  });
+
+  function renderBook(){
+    const items=getBook();
+    if(!items.length){bookList.innerHTML='<div class="small">Nenhum artigo salvo ainda.</div>';return;}
+    bookList.innerHTML=items.map(it=>`<div class="book-item"><div><strong>${esc(it.title)}</strong><div class="book-meta">${esc(it.date||'')} ${it.theme?'• '+esc(it.theme):''}</div></div><div class="book-actions"><button class="secondary" data-load="${it.id}">Abrir</button><button class="print" data-print="${it.id}">Imprimir</button><button class="danger" data-delete="${it.id}">Excluir</button></div></div>`).join('');
+    bookList.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>loadItem(Number(b.dataset.load)));
+    bookList.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteItem(Number(b.dataset.delete)));
+    bookList.querySelectorAll('[data-print]').forEach(b=>b.onclick=()=>{loadItem(Number(b.dataset.print));document.querySelector('#printPanel').open=true;status.textContent='Escolha o idioma e toque em “Abrir impressão / Salvar PDF”.';});
+  }
+  function loadItem(id){const it=getBook().find(x=>x.id===id);if(!it)return;titleEl.value=it.title||'';themeEl.value=it.theme||'';dateEl.value=it.date||'';setTexts(it.texts||{});status.textContent='⭐ Artigo carregado do Caderno.';window.scrollTo({top:0,behavior:'smooth'});}
+  function deleteItem(id){if(!confirm('Excluir este artigo do Caderno?'))return;setBook(getBook().filter(x=>x.id!==id));status.textContent='Artigo excluído do Caderno.';}
+  renderBook(); updateCounts();
+
+  document.querySelector('#printBtn').addEventListener('click',()=>{document.querySelector('#printPanel').open=true;document.querySelector('#printPanel').scrollIntoView({behavior:'smooth'});});
+  document.querySelector('#doPrint').addEventListener('click',()=>{
+    const choice=document.querySelector('#printLang').value; const texts=getTexts();
+    const langs=choice==='all'?['pt','en','fr','es']:[choice];
+    const pages=langs.filter(l=>texts[l]).map(l=>`<article class="print-page"><div class="print-lang">${langFlags[l]} ${langNames[l]}</div><h1 class="print-title">${esc(titleEl.value.trim()||'4 Idiomas')}</h1><div class="print-meta">${esc(dateEl.value||'')} ${themeEl.value.trim()?'• '+esc(themeEl.value.trim()):''}</div><div class="print-text">${esc(texts[l])}</div></article>`).join('');
+    if(!pages){status.textContent='Não há texto no idioma escolhido para imprimir.';return;}
+    printView.innerHTML=pages; setTimeout(()=>window.print(),120);
+  });
+
+  function sentences(text){return (text||'').replace(/\n+/g,' ').match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)?.map(s=>s.trim()).filter(s=>s.length>15)||[];}
+  function random(arr){return arr[Math.floor(Math.random()*arr.length)];}
+  function createExercise(){
+    const type=document.querySelector('#exerciseType').value; const lang=document.querySelector('#exerciseLang').value; const texts=getTexts(); const box=document.querySelector('#exerciseBox');
+    if(!texts[lang]){box.innerHTML='<div class="small">Não há texto em '+langNames[lang]+'. Traduza ou carregue um artigo primeiro.</div>';return;}
+    const sents=sentences(texts[lang]); if(!sents.length){box.innerHTML='<div class="small">O texto ainda é curto demais para gerar exercícios.</div>';return;}
+    let chosenType=type==='surprise'?random(['translate','complete']):type;
+    if(chosenType==='translate'){
+      const sourceLang=lang; const targetCandidates=['pt','en','fr','es'].filter(l=>l!==sourceLang&&texts[l]); const targetLang=random(targetCandidates);
+      if(!targetLang){box.innerHTML='<div class="small">É preciso ter pelo menos dois idiomas preenchidos.</div>';return;}
+      const srcSents=sentences(texts[sourceLang]); const tgtSents=sentences(texts[targetLang]); const idx=Math.min(Math.floor(Math.random()*srcSents.length),Math.max(0,tgtSents.length-1));
+      const q=srcSents[idx]||random(srcSents); const a=tgtSents[idx]||random(tgtSents);
+      box.innerHTML=`<div class="exercise-q">Traduza de ${langNames[sourceLang]} para ${langNames[targetLang]}:</div><div>${esc(q)}</div><div class="exercise-controls"><button class="secondary reveal">Mostrar resposta</button></div><div class="answer">${esc(a)}</div>`;
+    }else{
+      const q=random(sents); const words=q.split(/\s+/).filter(w=>w.replace(/[^A-Za-zÀ-ÿ'-]/g,'').length>=4);
+      if(!words.length){box.innerHTML='<div class="small">Não encontrei uma palavra adequada para ocultar.</div>';return;}
+      const word=random(words); const blank='_____'; const masked=q.replace(word,blank);
+      box.innerHTML=`<div class="exercise-q">Complete a frase em ${langNames[lang]}:</div><div>${esc(masked)}</div><input id="exerciseAnswer" placeholder="Digite a palavra que falta" style="margin-top:10px"><div class="exercise-controls"><button class="secondary check">Verificar</button><button class="secondary reveal">Mostrar resposta</button></div><div class="answer">${esc(word)}</div>`;
+      box.querySelector('.check').onclick=()=>{const v=normalize(box.querySelector('#exerciseAnswer').value);status.textContent=v===normalize(word)?'✓ Resposta correta!':'Ainda não. Tente novamente ou mostre a resposta.';};
+    }
+    box.querySelectorAll('.reveal').forEach(b=>b.onclick=()=>{box.querySelector('.answer').style.display='block';});
+  }
+  document.querySelector('#exerciseBtn').addEventListener('click',()=>{document.querySelector('#exercisePanel').open=true;createExercise();document.querySelector('#exercisePanel').scrollIntoView({behavior:'smooth'});});
+  document.querySelector('#newExercise').addEventListener('click',createExercise);
 })();
 </script>
 </body>
