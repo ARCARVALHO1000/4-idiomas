@@ -4,7 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#2563eb" />
-  <title>4 Idiomas — Teste 4.1</title>
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="4 Idiomas" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <title>4 Idiomas — Versão 4.2b</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#172033}
@@ -41,7 +48,7 @@
 <body>
 <main class="wrap">
   <h1>4 Idiomas</h1>
-  <p class="note">Teste 4.1 — textos longos, tradução em blocos, voz, pronúncia, Caderno, exercícios e impressão por idioma.</p>
+  <p class="note">Versão 4.2b — textos longos, voz, Caderno, exercícios, impressão, backup/restauração e atalho com ícone no tablet.</p>
 
   <section class="meta">
     <div class="meta-grid">
@@ -80,6 +87,8 @@
       <button id="saveArticle" class="save">⭐ SALVAR NO CADERNO</button>
       <button id="printBtn" class="print">🖨️ IMPRIMIR</button>
       <button id="exerciseBtn" class="exercise">🧠 EXERCÍCIOS</button>
+      <button id="backupBtn" class="save">💾 BACKUP</button>
+      <button id="installBtn" class="secondary">📲 ÍCONE NO TABLET</button>
       <button id="clear" class="secondary">Limpar</button>
     </div>
     <div class="progress" id="progress"><div class="bar" id="bar"></div></div>
@@ -98,6 +107,22 @@
   <details id="bookPanel">
     <summary>⭐ Caderno de artigos</summary>
     <div id="bookList" class="book-list"></div>
+  </details>
+
+  <details id="backupPanel">
+    <summary>💾 Backup e restauração do Caderno</summary>
+    <div class="row">
+      <button id="backupBook" class="save">💾 FAZER BACKUP</button>
+      <button id="restoreBook" class="secondary">♻️ RESTAURAR BACKUP</button>
+      <input id="restoreFile" type="file" accept=".json,application/json" hidden />
+    </div>
+    <p class="small">O backup guarda todos os artigos do Caderno em um arquivo JSON. Primeiro o aplicativo tenta deixar você escolher uma pasta do tablet. Se o navegador não permitir, ele oferece salvar o arquivo ou usa a pasta Downloads.</p>
+  </details>
+
+  <details id="installPanel">
+    <summary>📲 Criar ícone para abrir o aplicativo</summary>
+    <p class="small">No Chrome do tablet, abra o menu ⋮ e escolha “Adicionar à tela inicial” ou “Instalar app”. O atalho abrirá diretamente o 4 Idiomas e usará o novo ícone azul.</p>
+    <div class="row"><button id="showInstallHelp" class="primary">MOSTRAR INSTRUÇÕES</button></div>
   </details>
 
   <details id="exercisePanel">
@@ -269,6 +294,92 @@
   function setTexts(texts){boxes.forEach(b=>b.value=texts?.[b.dataset.lang]||'');updateCounts();}
   function getBook(){try{return JSON.parse(localStorage.getItem(BOOK_KEY)||'[]');}catch(_){return[];}}
   function setBook(items){localStorage.setItem(BOOK_KEY,JSON.stringify(items));renderBook();}
+
+  function backupName(){
+    const d=new Date();
+    const stamp=d.toISOString().slice(0,10);
+    return '4-idiomas-backup-'+stamp+'.json';
+  }
+
+  async function makeBackup(){
+    const items=getBook();
+    const payload={
+      app:'4 Idiomas',
+      version:'4.2b',
+      createdAt:new Date().toISOString(),
+      articles:items
+    };
+    const data=JSON.stringify(payload,null,2);
+    const name=backupName();
+
+    if('showDirectoryPicker' in window){
+      try{
+        const dir=await window.showDirectoryPicker({mode:'readwrite'});
+        const fileHandle=await dir.getFileHandle(name,{create:true});
+        const writable=await fileHandle.createWritable();
+        await writable.write(data);
+        await writable.close();
+        status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo na pasta que você escolheu.';
+        return;
+      }catch(err){
+        if(err && err.name==='AbortError'){
+          status.textContent='Backup cancelado.';
+          return;
+        }
+      }
+    }
+
+    if('showSaveFilePicker' in window){
+      try{
+        const handle=await window.showSaveFilePicker({
+          suggestedName:name,
+          types:[{description:'Backup do 4 Idiomas',accept:{'application/json':['.json']}}]
+        });
+        const writable=await handle.createWritable();
+        await writable.write(data);
+        await writable.close();
+        status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo no local escolhido.';
+        return;
+      }catch(err){
+        if(err && err.name==='AbortError'){
+          status.textContent='Backup cancelado.';
+          return;
+        }
+      }
+    }
+
+    const blob=new Blob([data],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1200);
+    status.textContent='💾 Backup criado: '+name+'. Procure o arquivo na pasta Downloads do tablet.';
+  }
+
+  async function restoreBackup(file){
+    try{
+      const raw=await file.text();
+      const parsed=JSON.parse(raw);
+      const imported=Array.isArray(parsed)?parsed:parsed?.articles;
+      if(!Array.isArray(imported)) throw new Error('arquivo sem lista de artigos');
+      const valid=imported.filter(it=>it && typeof it==='object' && it.texts && typeof it.texts==='object');
+      if(!valid.length && imported.length) throw new Error('nenhum artigo válido encontrado');
+
+      const current=getBook();
+      const seen=new Set(current.map(it=>String(it.id)));
+      const additions=valid.filter(it=>!seen.has(String(it.id)));
+      setBook([...additions,...current].slice(0,100));
+      status.textContent='♻️ Backup restaurado. '+additions.length+' artigo(s) novo(s) adicionado(s) ao Caderno.';
+      document.querySelector('#bookPanel').open=true;
+    }catch(err){
+      status.textContent='⚠️ Não foi possível restaurar o backup: '+(err?.message||'arquivo inválido')+'.';
+    }
+  }
+
   function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
   document.querySelector('#saveArticle').addEventListener('click',()=>{
@@ -323,6 +434,56 @@
   }
   document.querySelector('#exerciseBtn').addEventListener('click',()=>{document.querySelector('#exercisePanel').open=true;createExercise();document.querySelector('#exercisePanel').scrollIntoView({behavior:'smooth'});});
   document.querySelector('#newExercise').addEventListener('click',createExercise);
+
+  const backupPanel=document.querySelector('#backupPanel');
+  const installPanel=document.querySelector('#installPanel');
+  const restoreFile=document.querySelector('#restoreFile');
+
+  document.querySelector('#backupBtn').addEventListener('click',()=>{
+    backupPanel.open=true;
+    backupPanel.scrollIntoView({behavior:'smooth'});
+    status.textContent='💾 Escolha “Fazer backup” para salvar uma cópia do Caderno no tablet.';
+  });
+  document.querySelector('#backupBook').addEventListener('click',makeBackup);
+  document.querySelector('#restoreBook').addEventListener('click',()=>restoreFile.click());
+  restoreFile.addEventListener('change',async()=>{
+    const file=restoreFile.files?.[0];
+    if(file) await restoreBackup(file);
+    restoreFile.value='';
+  });
+
+  let deferredInstallPrompt=null;
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    deferredInstallPrompt=e;
+  });
+  window.addEventListener('appinstalled',()=>{
+    deferredInstallPrompt=null;
+    status.textContent='✓ 4 Idiomas instalado. O ícone já pode aparecer na tela inicial do tablet.';
+  });
+
+  document.querySelector('#installBtn').addEventListener('click',async()=>{
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      const result=await deferredInstallPrompt.userChoice;
+      if(result.outcome==='accepted') status.textContent='📲 Instalação confirmada. Procure o ícone 4 Idiomas na tela inicial.';
+      else status.textContent='Instalação cancelada. Você pode tentar novamente quando quiser.';
+      deferredInstallPrompt=null;
+      return;
+    }
+    installPanel.open=true;
+    installPanel.scrollIntoView({behavior:'smooth'});
+    status.textContent='📲 No Chrome, toque em ⋮ e escolha “Adicionar à tela inicial” ou “Instalar app”.';
+  });
+  document.querySelector('#showInstallHelp').addEventListener('click',()=>{
+    alert('Para criar o ícone do 4 Idiomas no tablet:\n\n1. Abra esta página no Chrome.\n2. Toque no menu ⋮ no canto superior.\n3. Toque em “Adicionar à tela inicial” ou “Instalar app”.\n4. Confirme o nome “4 Idiomas”.\n\nDepois disso, o novo ícone azul ficará na tela inicial e abrirá diretamente o aplicativo.');
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    });
+  }
 })();
 </script>
 </body>
