@@ -1,4 +1,4 @@
-const CACHE_NAME = '4-idiomas-v4-2b';
+const CACHE_NAME = '4-idiomas-v4-3a';
 const APP_FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', event => {
