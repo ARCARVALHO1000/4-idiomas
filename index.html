@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <title>4 Idiomas — Versão 4.3a</title>
+  <title>4 Idiomas — Versão 4.3b</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#172033}
@@ -32,7 +32,7 @@
     button:disabled{opacity:.55;cursor:wait}
     .primary{background:#2563eb;color:#fff}.secondary{background:#e8edf6;color:#172033}.mic{background:#eef2ff;color:#1e3a8a}.save{background:#0f766e;color:#fff}.print{background:#7c3aed;color:#fff}.exercise{background:#b45309;color:#fff}.danger{background:#fee2e2;color:#991b1b}
     .status{margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1px solid #d9deea;min-height:48px;white-space:pre-line}
-    .small{font-size:13px;color:#6b7280;line-height:1.45}
+    .small{font-size:13px;color:#6b7280;line-height:1.45}.ok{color:#0f766e;font-weight:700}
     .progress{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px;display:none}.bar{height:100%;width:0;background:#2563eb;transition:width .2s}
     details{background:#fff;border:1px solid #d9deea;border-radius:14px;padding:10px 12px;margin-top:12px}
     summary{cursor:pointer;font-weight:800}
@@ -48,7 +48,7 @@
 <body>
 <main class="wrap">
   <h1>4 Idiomas</h1>
-  <p class="note">Versão 4.3a — tradução mais confiável, voz aprimorada (inclusive francês), Caderno, exercícios, impressão, backup/restauração e ícone no tablet.</p>
+  <p class="note">Versão 4.3b — tradução com controle de limite, voz aprimorada (inclusive francês), Caderno, exercícios, impressão, backup/restauração e ícone no tablet.</p>
 
   <section class="meta">
     <div class="meta-grid">
@@ -93,8 +93,19 @@
     </div>
     <div class="progress" id="progress"><div class="bar" id="bar"></div></div>
     <div id="status" class="status">Pronto. Cole um artigo em qualquer idioma, ou use 🎤 Falar.</div>
-    <p class="small">Textos longos são divididos por frases e parágrafos para reduzir erros. A tradução usa o serviço gratuito MyMemory e requer internet; em textos maiores o processo pode levar algum tempo.</p>
+    <p class="small">A tradução usa o serviço gratuito MyMemory e requer internet. A versão 4.3b envia blocos menores que o limite técnico do serviço, faz pausas entre pedidos e tenta novamente automaticamente quando ocorre um limite temporário.</p>
   </section>
+
+  <details id="translatorPanel">
+    <summary>🌐 Configuração da tradução</summary>
+    <p class="small">Para ampliar a cota gratuita do MyMemory, você pode informar um e-mail de contato. Ele fica salvo somente neste navegador/aparelho e é enviado ao MyMemory durante a tradução. <b>Não é gravado no GitHub nem no backup do Caderno.</b></p>
+    <div class="row" style="align-items:end">
+      <div style="min-width:260px;flex:1"><label for="translatorEmail">E-mail de contato do tradutor</label><input id="translatorEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" /></div>
+      <button id="saveTranslatorEmail" class="primary">SALVAR E-MAIL NESTE APARELHO</button>
+      <button id="removeTranslatorEmail" class="secondary">REMOVER</button>
+    </div>
+    <p id="translatorEmailState" class="small"></p>
+  </details>
 
   <details id="printPanel">
     <summary>🖨️ Opções de impressão</summary>
@@ -116,12 +127,12 @@
       <button id="restoreBook" class="secondary">♻️ RESTAURAR BACKUP</button>
       <input id="restoreFile" type="file" accept=".json,application/json" hidden />
     </div>
-    <p class="small">O backup guarda todos os artigos do Caderno em um arquivo JSON. Primeiro o aplicativo tenta deixar você escolher uma pasta do tablet. Se o navegador não permitir, ele oferece salvar o arquivo ou usa a pasta Downloads.</p>
+    <p class="small">O backup guarda todos os artigos do Caderno em um arquivo JSON. O e-mail de configuração da tradução não entra no backup.</p>
   </details>
 
   <details id="installPanel">
     <summary>📲 Criar ícone para abrir o aplicativo</summary>
-    <p class="small">No Chrome do tablet, abra o menu ⋮ e escolha “Adicionar à tela inicial” ou “Instalar app”. O atalho abrirá diretamente o 4 Idiomas e usará o novo ícone azul.</p>
+    <p class="small">No Chrome do tablet, abra o menu ⋮ e escolha “Adicionar à tela inicial” ou “Instalar app”.</p>
     <div class="row"><button id="showInstallHelp" class="primary">MOSTRAR INSTRUÇÕES</button></div>
   </details>
 
@@ -140,483 +151,203 @@
 
 <script>
 (() => {
-  const boxes = [...document.querySelectorAll('textarea[data-lang]')];
-  const translateBtn = document.querySelector('#translate');
-  const status = document.querySelector('#status');
-  const titleEl = document.querySelector('#title');
-  const themeEl = document.querySelector('#theme');
-  const dateEl = document.querySelector('#articleDate');
-  const progress = document.querySelector('#progress');
-  const bar = document.querySelector('#bar');
-  const bookList = document.querySelector('#bookList');
-  const printView = document.querySelector('#printView');
-  let active = boxes[0];
-  let recognition = null;
-  let listeningButton = null;
-  const BOOK_KEY = 'quatroIdiomasCadernoV1';
-  const langNames = {pt:'Português',en:'Inglês',fr:'Francês',es:'Espanhol'};
-  const langFlags = {pt:'🇧🇷',en:'🇺🇸',fr:'🇫🇷',es:'🇪🇸'};
+  const boxes=[...document.querySelectorAll('textarea[data-lang]')];
+  const translateBtn=document.querySelector('#translate');
+  const status=document.querySelector('#status');
+  const titleEl=document.querySelector('#title');
+  const themeEl=document.querySelector('#theme');
+  const dateEl=document.querySelector('#articleDate');
+  const progress=document.querySelector('#progress');
+  const bar=document.querySelector('#bar');
+  const bookList=document.querySelector('#bookList');
+  const printView=document.querySelector('#printView');
+  const translatorEmail=document.querySelector('#translatorEmail');
+  const translatorEmailState=document.querySelector('#translatorEmailState');
+  let active=boxes[0];
+  let recognition=null;
+  let listeningButton=null;
+  let speechRun=0;
+  const BOOK_KEY='quatroIdiomasCadernoV1';
+  const EMAIL_KEY='quatroIdiomasMyMemoryEmailV1';
+  const langNames={pt:'Português',en:'Inglês',fr:'Francês',es:'Espanhol'};
+  const langFlags={pt:'🇧🇷',en:'🇺🇸',fr:'🇫🇷',es:'🇪🇸'};
+  const encoder=new TextEncoder();
 
-  dateEl.value = new Date().toISOString().slice(0,10);
+  function localDate(){const d=new Date();const z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());}
+  dateEl.value=localDate();
+  const languageName=box=>box.getAttribute('aria-label');
+  const normalize=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const byteLength=s=>encoder.encode(s||'').length;
 
-  const languageName = box => box.getAttribute('aria-label');
-  const normalize = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+  function updateCounts(){boxes.forEach(b=>{const el=document.querySelector('[data-count="'+b.dataset.lang+'"]');if(el)el.textContent=b.value.length+' caracteres';});}
+  boxes.forEach(box=>{box.addEventListener('focus',()=>{active=box;status.textContent='Entrada selecionada: '+languageName(box)+'.';});box.addEventListener('input',updateCounts);});
+  function decodeHtml(text){const t=document.createElement('textarea');t.innerHTML=text;return t.value;}
 
-  function updateCounts(){
-    boxes.forEach(b=>{
-      const el=document.querySelector('[data-count="'+b.dataset.lang+'"]');
-      if(el) el.textContent=b.value.length+' caracteres';
-    });
+  function updateEmailState(){
+    const saved=localStorage.getItem(EMAIL_KEY)||'';
+    translatorEmail.value=saved;
+    translatorEmailState.innerHTML=saved?'<span class="ok">✓ E-mail configurado neste aparelho.</span> O endereço não é salvo no código do aplicativo.':'Nenhum e-mail configurado. A tradução continuará funcionando, mas com a cota anônima do serviço.';
   }
-  boxes.forEach(box => {
-    box.addEventListener('focus', () => { active = box; status.textContent = 'Entrada selecionada: ' + languageName(box) + '.'; });
-    box.addEventListener('input', updateCounts);
+  document.querySelector('#saveTranslatorEmail').addEventListener('click',()=>{
+    const email=translatorEmail.value.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status.textContent='Digite um e-mail válido para a configuração do tradutor.';translatorEmail.focus();return;}
+    localStorage.setItem(EMAIL_KEY,email);updateEmailState();status.textContent='✓ E-mail do tradutor salvo somente neste aparelho.';
   });
+  document.querySelector('#removeTranslatorEmail').addEventListener('click',()=>{localStorage.removeItem(EMAIL_KEY);translatorEmail.value='';updateEmailState();status.textContent='Configuração de e-mail removida deste aparelho.';});
+  updateEmailState();
 
-  function decodeHtml(text){ const t=document.createElement('textarea'); t.innerHTML=text; return t.value; }
-
-  function splitText(text, maxLen=280){
+  function splitText(text,maxBytes=430){
     const clean=(text||'').replace(/\r/g,'').trim();
-    if(!clean) return [];
+    if(!clean)return[];
     const paras=clean.split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
     const chunks=[];
-    for(const para of paras.length?paras:[clean]){
-      const sentences=para.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)||[para];
-      let current='';
-      for(const s0 of sentences){
-        const sentence=s0.trim();
-        if(!sentence) continue;
-        if(sentence.length>maxLen){
-          if(current){chunks.push(current.trim());current='';}
-          const words=sentence.split(/\s+/);
-          let part='';
-          for(const word of words){
-            const candidate=(part+' '+word).trim();
-            if(candidate.length>maxLen && part){chunks.push(part.trim());part=word;}
-            else part=candidate;
-          }
-          if(part) chunks.push(part.trim());
-        }else if((current+' '+sentence).trim().length>maxLen){
-          if(current) chunks.push(current.trim());
-          current=sentence;
-        }else current=(current+' '+sentence).trim();
+    const pushLong=s=>{
+      const words=s.split(/\s+/);let part='';
+      for(const word of words){
+        const candidate=(part+' '+word).trim();
+        if(byteLength(candidate)>maxBytes&&part){chunks.push(part.trim());part=word;}
+        else part=candidate;
       }
-      if(current) chunks.push(current.trim());
-      // marcador interno para conservar os parágrafos durante a remontagem
+      if(part)chunks.push(part.trim());
+    };
+    for(const para of paras.length?paras:[clean]){
+      const sentences=para.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)||[para];let current='';
+      for(const raw of sentences){
+        const sentence=raw.trim();if(!sentence)continue;
+        if(byteLength(sentence)>maxBytes){if(current){chunks.push(current.trim());current='';}pushLong(sentence);continue;}
+        const candidate=(current+' '+sentence).trim();
+        if(byteLength(candidate)>maxBytes){if(current)chunks.push(current.trim());current=sentence;}else current=candidate;
+      }
+      if(current)chunks.push(current.trim());
       chunks.push('__PARAGRAPH_BREAK__');
     }
-    if(chunks[chunks.length-1]==='__PARAGRAPH_BREAK__') chunks.pop();
+    if(chunks[chunks.length-1]==='__PARAGRAPH_BREAK__')chunks.pop();
     return chunks;
   }
 
-  function translationLooksInvalid(sourceText, translatedText, source, target){
-    const t=(translatedText||'').trim();
-    if(!t) return true;
+  function translationLooksInvalid(sourceText,translatedText,source,target){
+    const t=(translatedText||'').trim();if(!t)return true;
     const upper=t.toUpperCase();
-    if(upper.includes('MYMEMORY WARNING') || upper.includes('QUERY LENGTH LIMIT') || upper.includes('PLEASE USE AN API KEY')) return true;
-    if(source===target) return false;
-    const src=normalize(sourceText);
-    const dst=normalize(t);
-    if(src && src===dst && src.length>12) return true;
-    return false;
+    if(upper.includes('MYMEMORY WARNING')||upper.includes('QUERY LENGTH LIMIT')||upper.includes('PLEASE USE AN API KEY')||upper.includes('DAILY LIMIT'))return true;
+    if(source===target)return false;
+    const src=normalize(sourceText),dst=normalize(t);return !!(src&&src===dst&&src.length>12);
   }
 
-  async function requestTranslation(text, source, target){
-    const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+encodeURIComponent(source+'|'+target);
-    const response=await fetch(url,{method:'GET',cache:'no-store'});
-    if(!response.ok) throw new Error('HTTP '+response.status);
-    const data=await response.json();
-    const translated=decodeHtml(data?.responseData?.translatedText||'').trim();
-    const code=Number(data?.responseStatus||200);
-    if(code>=400) throw new Error(data?.responseDetails||('erro '+code+' do tradutor'));
-    return translated;
+  async function requestTranslation(text,source,target){
+    let url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+encodeURIComponent(source+'|'+target);
+    const email=localStorage.getItem(EMAIL_KEY)||'';
+    if(email)url+='&de='+encodeURIComponent(email);
+    const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),18000);
+    try{
+      const response=await fetch(url,{method:'GET',cache:'no-store',signal:controller.signal});
+      if(response.status===429){const e=new Error('HTTP 429');e.code=429;throw e;}
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      const data=await response.json();
+      const code=Number(data?.responseStatus||200);
+      if(code===429){const e=new Error('HTTP 429');e.code=429;throw e;}
+      if(code>=400)throw new Error(data?.responseDetails||('erro '+code+' do tradutor'));
+      return decodeHtml(data?.responseData?.translatedText||'').trim();
+    }catch(err){if(err?.name==='AbortError')throw new Error('tempo de resposta excedido');throw err;}finally{clearTimeout(timer);}
   }
 
-  async function translateChunk(text, source, target){
+  async function translateChunk(text,source,target){
     let lastError='tradução inválida';
-    for(let attempt=1;attempt<=3;attempt++){
+    const waits429=[2500,6000,12000];
+    for(let attempt=0;attempt<4;attempt++){
       try{
         const translated=await requestTranslation(text,source,target);
-        if(!translationLooksInvalid(text,translated,source,target)) return translated;
+        if(!translationLooksInvalid(text,translated,source,target))return translated;
         lastError='o tradutor devolveu texto sem traduzir ou uma mensagem de limite';
       }catch(err){
         lastError=err?.message||lastError;
+        if(err?.code===429||lastError.includes('429')){
+          if(attempt<3){const wait=waits429[Math.min(attempt,waits429.length-1)];status.textContent='⏳ O tradutor atingiu um limite temporário. Aguardando '+Math.ceil(wait/1000)+' s para tentar novamente…';await sleep(wait);continue;}
+          throw new Error('limite do MyMemory (HTTP 429). Confira se o e-mail está salvo em “Configuração da tradução” ou tente novamente mais tarde');
+        }
       }
-      await sleep(450*attempt);
-    }
-
-    // Se um bloco maior falhar, tenta novamente em frases menores.
-    const smaller=(text.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)||[]).map(x=>x.trim()).filter(Boolean);
-    if(smaller.length>1){
-      const recovered=[];
-      for(const part of smaller){
-        const translated=await requestTranslation(part,source,target);
-        if(translationLooksInvalid(part,translated,source,target)) throw new Error(lastError);
-        recovered.push(translated);
-        await sleep(260);
-      }
-      return recovered.join(' ');
+      if(attempt<3)await sleep(900*(attempt+1));
     }
     throw new Error(lastError);
   }
 
-  async function translateLong(text, source, target, onStep){
-    const chunks=splitText(text);
-    const realTotal=chunks.filter(c=>c!=='__PARAGRAPH_BREAK__').length;
-    let done=0;
-    const out=[];
+  function assemble(parts){return parts.join(' ').replace(/\s*__PARAGRAPH_BREAK__\s*/g,'\n\n').trim();}
+  async function translateLong(text,source,target,onStep,onPartial){
+    const chunks=splitText(text);const realTotal=chunks.filter(c=>c!=='__PARAGRAPH_BREAK__').length;let done=0;const out=[];
     for(const chunk of chunks){
-      if(chunk==='__PARAGRAPH_BREAK__'){
-        out.push('__PARAGRAPH_BREAK__');
-        continue;
-      }
-      const translated=await translateChunk(chunk,source,target);
-      out.push(translated);
-      done++;
-      onStep?.(done,realTotal);
-      await sleep(260);
+      if(chunk==='__PARAGRAPH_BREAK__'){out.push(chunk);continue;}
+      const translated=await translateChunk(chunk,source,target);out.push(translated);done++;onPartial?.(assemble(out));onStep?.(done,realTotal);await sleep(750);
     }
-    return out.join(' ').replace(/\s*__PARAGRAPH_BREAK__\s*/g,'\n\n').trim();
+    return assemble(out);
   }
 
-  translateBtn.addEventListener('click', async()=>{
-    const text=active.value.trim();
-    if(!text){status.textContent='Digite ou cole um texto primeiro, ou use 🎤 Falar.';active.focus();return;}
-    const source=active.dataset.lang;
-    const targets=boxes.filter(b=>b!==active);
-    translateBtn.disabled=true; progress.style.display='block'; bar.style.width='0%';
-    let completed=0; const totalTargets=targets.length;
+  translateBtn.addEventListener('click',async()=>{
+    const text=active.value.trim();if(!text){status.textContent='Digite ou cole um texto primeiro, ou use 🎤 Falar.';active.focus();return;}
+    const source=active.dataset.lang;const targets=boxes.filter(b=>b!==active);translateBtn.disabled=true;progress.style.display='block';bar.style.width='0%';let completed=0;const totalTargets=targets.length;
     try{
       for(const target of targets){
         status.textContent='🌐 Traduzindo para '+languageName(target)+'…';
-        const translated=await translateLong(text,source,target.dataset.lang,(done,total)=>{
-          const targetPart=(done/total)/totalTargets;
-          const pct=Math.round(((completed/totalTargets)+targetPart)*100);
-          bar.style.width=Math.min(100,pct)+'%';
-          status.textContent='🌐 Traduzindo para '+languageName(target)+' — bloco '+done+' de '+total+'…';
-        });
-        target.value=translated; completed++; updateCounts();
-        bar.style.width=Math.round((completed/totalTargets)*100)+'%';
+        const translated=await translateLong(text,source,target.dataset.lang,(done,total)=>{const pct=Math.round(((completed/totalTargets)+((done/total)/totalTargets))*100);bar.style.width=Math.min(100,pct)+'%';status.textContent='🌐 Traduzindo para '+languageName(target)+' — bloco '+done+' de '+total+'…';},partial=>{target.value=partial;updateCounts();});
+        target.value=translated;completed++;updateCounts();bar.style.width=Math.round((completed/totalTargets)*100)+'%';
+        if(completed<totalTargets)await sleep(1200);
       }
       status.textContent='✓ Tradução concluída nos quatro idiomas.';
-    }catch(err){
-      status.textContent='⚠️ Tradução interrompida: '+(err?.message||'erro desconhecido')+'. O que já foi traduzido foi mantido. Tente novamente em alguns segundos.';
-    }finally{
-      translateBtn.disabled=false; setTimeout(()=>{progress.style.display='none';bar.style.width='0%';},900);
-    }
+    }catch(err){status.textContent='⚠️ Tradução interrompida: '+(err?.message||'erro desconhecido')+'. O que já foi traduzido foi mantido.';}
+    finally{translateBtn.disabled=false;setTimeout(()=>{progress.style.display='none';bar.style.width='0%';},1000);}
   });
 
-  document.querySelector('#clear').addEventListener('click',()=>{
-    if(recognition){try{recognition.abort();}catch(_){ } recognition=null;}
-    boxes.forEach(b=>b.value=''); titleEl.value=''; themeEl.value=''; dateEl.value=new Date().toISOString().slice(0,10); active=boxes[0]; updateCounts(); status.textContent='Campos limpos. Pronto.';
-  });
-
-  let speechRun=0;
+  document.querySelector('#clear').addEventListener('click',()=>{if(recognition){try{recognition.abort();}catch(_){}recognition=null;}speechRun++;if('speechSynthesis'in window)speechSynthesis.cancel();boxes.forEach(b=>b.value='');titleEl.value='';themeEl.value='';dateEl.value=localDate();active=boxes[0];updateCounts();status.textContent='Campos limpos. Pronto.';});
 
   function speechChunks(text,maxLen=190){
-    const sentences=(text||'').replace(/\n+/g,' ').match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)||[text];
-    const out=[];
-    let current='';
-    for(const raw of sentences){
-      const sentence=(raw||'').trim();
-      if(!sentence) continue;
-      if((current+' '+sentence).trim().length<=maxLen){current=(current+' '+sentence).trim();continue;}
-      if(current){out.push(current);current='';}
-      if(sentence.length<=maxLen){current=sentence;continue;}
-      const words=sentence.split(/\s+/);
-      let part='';
-      for(const word of words){
-        const candidate=(part+' '+word).trim();
-        if(candidate.length>maxLen && part){out.push(part);part=word;}
-        else part=candidate;
-      }
-      if(part) current=part;
-    }
-    if(current) out.push(current);
-    return out;
+    const sentences=(text||'').replace(/\n+/g,' ').match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)||[text];const out=[];let current='';
+    for(const raw of sentences){const sentence=(raw||'').trim();if(!sentence)continue;if((current+' '+sentence).trim().length<=maxLen){current=(current+' '+sentence).trim();continue;}if(current){out.push(current);current='';}if(sentence.length<=maxLen){current=sentence;continue;}const words=sentence.split(/\s+/);let part='';for(const word of words){const candidate=(part+' '+word).trim();if(candidate.length>maxLen&&part){out.push(part);part=word;}else part=candidate;}if(part)current=part;}if(current)out.push(current);return out;
   }
-
-  async function getSpeechVoices(){
-    let voices=speechSynthesis.getVoices();
-    if(voices.length) return voices;
-    await new Promise(resolve=>{
-      let finished=false;
-      const done=()=>{if(finished)return;finished=true;resolve();};
-      const timer=setTimeout(done,1200);
-      speechSynthesis.addEventListener('voiceschanged',()=>{clearTimeout(timer);done();},{once:true});
-    });
-    return speechSynthesis.getVoices();
-  }
-
-  function chooseVoice(voices,lang){
-    const wanted=(lang||'').toLowerCase();
-    const base=wanted.split('-')[0];
-    return voices.find(v=>(v.lang||'').toLowerCase()===wanted && v.localService)
-      || voices.find(v=>(v.lang||'').toLowerCase()===wanted)
-      || voices.find(v=>(v.lang||'').toLowerCase().startsWith(base+'-') && v.localService)
-      || voices.find(v=>(v.lang||'').toLowerCase().startsWith(base+'-'))
-      || null;
-  }
-
+  async function getSpeechVoices(){let voices=speechSynthesis.getVoices();if(voices.length)return voices;await new Promise(resolve=>{let finished=false;const done=()=>{if(finished)return;finished=true;resolve();};const timer=setTimeout(done,1200);speechSynthesis.addEventListener('voiceschanged',()=>{clearTimeout(timer);done();},{once:true});});return speechSynthesis.getVoices();}
+  function chooseVoice(voices,lang){const wanted=(lang||'').toLowerCase(),base=wanted.split('-')[0];return voices.find(v=>(v.lang||'').toLowerCase()===wanted&&v.localService)||voices.find(v=>(v.lang||'').toLowerCase()===wanted)||voices.find(v=>(v.lang||'').toLowerCase().startsWith(base+'-')&&v.localService)||voices.find(v=>(v.lang||'').toLowerCase().startsWith(base+'-'))||null;}
   async function speakText(box){
-    const text=box.value.trim();
-    if(!text){status.textContent='Não há texto nessa caixa para ouvir.';return;}
-    if(!('speechSynthesis' in window)){status.textContent='A leitura em voz alta não está disponível neste navegador.';return;}
-
-    const run=++speechRun;
-    speechSynthesis.cancel();
-    await sleep(80);
-    const voices=await getSpeechVoices();
-    const lang=box.dataset.voice;
-    const voice=chooseVoice(voices,lang);
-    const chunks=speechChunks(text);
-    if(!chunks.length) return;
-
-    status.textContent='🔊 Preparando voz em '+languageName(box)+'…';
-    let index=0;
-    const next=()=>{
-      if(run!==speechRun || index>=chunks.length){
-        if(run===speechRun) status.textContent='✓ Pronúncia concluída. Pronto.';
-        return;
-      }
-      const u=new SpeechSynthesisUtterance(chunks[index]);
-      u.lang=lang;
-      if(voice) u.voice=voice;
-      u.rate=.88;
-      u.pitch=1;
-      u.volume=1;
-      u.onstart=()=>{
-        const voiceInfo=voice?' ('+(voice.name||voice.lang)+')':'';
-        status.textContent='🔊 Ouvindo '+languageName(box)+voiceInfo+' — trecho '+(index+1)+' de '+chunks.length+'…';
-      };
-      u.onend=()=>{index++;setTimeout(next,70);};
-      u.onerror=e=>{
-        if(run!==speechRun) return;
-        const code=e?.error||'erro desconhecido';
-        status.textContent='⚠️ Falha na voz de '+languageName(box)+' ('+code+'). Verifique se a voz desse idioma está instalada no tablet.';
-      };
-      speechSynthesis.resume();
-      speechSynthesis.speak(u);
-    };
-    next();
+    const text=box.value.trim();if(!text){status.textContent='Não há texto nessa caixa para ouvir.';return;}if(!('speechSynthesis'in window)){status.textContent='A leitura em voz alta não está disponível neste navegador.';return;}
+    const run=++speechRun;speechSynthesis.cancel();await sleep(80);const voices=await getSpeechVoices();const lang=box.dataset.voice;const voice=chooseVoice(voices,lang);const chunks=speechChunks(text);if(!chunks.length)return;status.textContent='🔊 Preparando voz em '+languageName(box)+'…';let index=0;
+    const next=()=>{if(run!==speechRun||index>=chunks.length){if(run===speechRun)status.textContent='✓ Pronúncia concluída. Pronto.';return;}const u=new SpeechSynthesisUtterance(chunks[index]);u.lang=lang;if(voice)u.voice=voice;u.rate=.88;u.pitch=1;u.volume=1;u.onstart=()=>{const info=voice?' ('+(voice.name||voice.lang)+')':'';status.textContent='🔊 Ouvindo '+languageName(box)+info+' — trecho '+(index+1)+' de '+chunks.length+'…';};u.onend=()=>{index++;setTimeout(next,70);};u.onerror=e=>{if(run!==speechRun)return;status.textContent='⚠️ Falha na voz de '+languageName(box)+' ('+(e?.error||'erro desconhecido')+'). Verifique se a voz desse idioma está instalada no tablet.';};speechSynthesis.resume();speechSynthesis.speak(u);};next();
   }
+  document.querySelectorAll('.speak').forEach(btn=>btn.addEventListener('click',()=>speakText(btn.closest('.card').querySelector('textarea'))));
 
-  document.querySelectorAll('.speak').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const box=btn.closest('.card').querySelector('textarea');
-      speakText(box);
-    });
-  });
-
-  document.querySelectorAll('.listen').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition; const box=btn.closest('.card').querySelector('textarea');active=box;
-      if(!SR){status.textContent='🎤 O reconhecimento de voz não está disponível neste navegador. Tente usar o Chrome atualizado.';return;}
-      if(recognition){try{recognition.abort();}catch(_){ } recognition=null;}
-      recognition=new SR(); recognition.lang=box.dataset.voice; recognition.continuous=false; recognition.interimResults=false; recognition.maxAlternatives=1; listeningButton=btn; btn.disabled=true;
-      recognition.onstart=()=>status.textContent='🎤 Ouvindo '+languageName(box)+'… Fale agora.';
-      recognition.onresult=e=>{const transcript=e.results?.[0]?.[0]?.transcript?.trim();if(transcript){box.value=transcript;updateCounts();status.textContent='✓ Voz reconhecida: '+transcript+'. Agora toque em 🌐 TRADUZIR.';}else status.textContent='Não consegui entender. Tente novamente.';};
-      recognition.onerror=e=>{const c=e.error||'';if(c==='not-allowed'||c==='service-not-allowed')status.textContent='Permissão do microfone bloqueada. Autorize o microfone para este site.';else if(c==='no-speech')status.textContent='Não ouvi nenhuma fala. Tente novamente.';else if(c==='network')status.textContent='Falha de rede no reconhecimento de voz.';else status.textContent='Não foi possível reconhecer a voz ('+c+').';};
-      recognition.onend=()=>{if(listeningButton)listeningButton.disabled=false;recognition=null;listeningButton=null;};
-      try{recognition.start();}catch(_){btn.disabled=false;recognition=null;status.textContent='Não foi possível iniciar o microfone.';}
-    });
-  });
+  document.querySelectorAll('.listen').forEach(btn=>btn.addEventListener('click',()=>{
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const box=btn.closest('.card').querySelector('textarea');active=box;if(!SR){status.textContent='🎤 O reconhecimento de voz não está disponível neste navegador. Tente usar o Chrome atualizado.';return;}if(recognition){try{recognition.abort();}catch(_){}recognition=null;}recognition=new SR();recognition.lang=box.dataset.voice;recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=1;listeningButton=btn;btn.disabled=true;recognition.onstart=()=>status.textContent='🎤 Ouvindo '+languageName(box)+'… Fale agora.';recognition.onresult=e=>{const transcript=e.results?.[0]?.[0]?.transcript?.trim();if(transcript){box.value=transcript;updateCounts();status.textContent='✓ Voz reconhecida: '+transcript+'. Agora toque em 🌐 TRADUZIR.';}else status.textContent='Não consegui entender. Tente novamente.';};recognition.onerror=e=>{const c=e.error||'';if(c==='not-allowed'||c==='service-not-allowed')status.textContent='Permissão do microfone bloqueada. Autorize o microfone para este site.';else if(c==='no-speech')status.textContent='Não ouvi nenhuma fala. Tente novamente.';else if(c==='network')status.textContent='Falha de rede no reconhecimento de voz.';else status.textContent='Não foi possível reconhecer a voz ('+c+').';};recognition.onend=()=>{if(listeningButton)listeningButton.disabled=false;recognition=null;listeningButton=null;};try{recognition.start();}catch(_){btn.disabled=false;recognition=null;status.textContent='Não foi possível iniciar o microfone.';}
+  }));
 
   function getTexts(){const o={};boxes.forEach(b=>o[b.dataset.lang]=b.value.trim());return o;}
   function setTexts(texts){boxes.forEach(b=>b.value=texts?.[b.dataset.lang]||'');updateCounts();}
   function getBook(){try{return JSON.parse(localStorage.getItem(BOOK_KEY)||'[]');}catch(_){return[];}}
   function setBook(items){localStorage.setItem(BOOK_KEY,JSON.stringify(items));renderBook();}
-
-  function backupName(){
-    const d=new Date();
-    const stamp=d.toISOString().slice(0,10);
-    return '4-idiomas-backup-'+stamp+'.json';
-  }
-
+  function backupName(){return'4-idiomas-backup-'+localDate()+'.json';}
   async function makeBackup(){
-    const items=getBook();
-    const payload={
-      app:'4 Idiomas',
-      version:'4.3a',
-      createdAt:new Date().toISOString(),
-      articles:items
-    };
-    const data=JSON.stringify(payload,null,2);
-    const name=backupName();
-
-    if('showDirectoryPicker' in window){
-      try{
-        const dir=await window.showDirectoryPicker({mode:'readwrite'});
-        const fileHandle=await dir.getFileHandle(name,{create:true});
-        const writable=await fileHandle.createWritable();
-        await writable.write(data);
-        await writable.close();
-        status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo na pasta que você escolheu.';
-        return;
-      }catch(err){
-        if(err && err.name==='AbortError'){
-          status.textContent='Backup cancelado.';
-          return;
-        }
-      }
-    }
-
-    if('showSaveFilePicker' in window){
-      try{
-        const handle=await window.showSaveFilePicker({
-          suggestedName:name,
-          types:[{description:'Backup do 4 Idiomas',accept:{'application/json':['.json']}}]
-        });
-        const writable=await handle.createWritable();
-        await writable.write(data);
-        await writable.close();
-        status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo no local escolhido.';
-        return;
-      }catch(err){
-        if(err && err.name==='AbortError'){
-          status.textContent='Backup cancelado.';
-          return;
-        }
-      }
-    }
-
-    const blob=new Blob([data],{type:'application/json;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1200);
-    status.textContent='💾 Backup criado: '+name+'. Procure o arquivo na pasta Downloads do tablet.';
+    const payload={app:'4 Idiomas',version:'4.3b',createdAt:new Date().toISOString(),articles:getBook()};const data=JSON.stringify(payload,null,2);const name=backupName();
+    if('showDirectoryPicker'in window){try{const dir=await window.showDirectoryPicker({mode:'readwrite'});const fh=await dir.getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(data);await w.close();status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo na pasta que você escolheu.';return;}catch(err){if(err?.name==='AbortError'){status.textContent='Backup cancelado.';return;}}}
+    if('showSaveFilePicker'in window){try{const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:'Backup do 4 Idiomas',accept:{'application/json':['.json']}}]});const w=await h.createWritable();await w.write(data);await w.close();status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo no local escolhido.';return;}catch(err){if(err?.name==='AbortError'){status.textContent='Backup cancelado.';return;}}}
+    const blob=new Blob([data],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);status.textContent='💾 Backup criado: '+name+'. Procure o arquivo na pasta Downloads do tablet.';
   }
-
-  async function restoreBackup(file){
-    try{
-      const raw=await file.text();
-      const parsed=JSON.parse(raw);
-      const imported=Array.isArray(parsed)?parsed:parsed?.articles;
-      if(!Array.isArray(imported)) throw new Error('arquivo sem lista de artigos');
-      const valid=imported.filter(it=>it && typeof it==='object' && it.texts && typeof it.texts==='object');
-      if(!valid.length && imported.length) throw new Error('nenhum artigo válido encontrado');
-
-      const current=getBook();
-      const seen=new Set(current.map(it=>String(it.id)));
-      const additions=valid.filter(it=>!seen.has(String(it.id)));
-      setBook([...additions,...current].slice(0,100));
-      status.textContent='♻️ Backup restaurado. '+additions.length+' artigo(s) novo(s) adicionado(s) ao Caderno.';
-      document.querySelector('#bookPanel').open=true;
-    }catch(err){
-      status.textContent='⚠️ Não foi possível restaurar o backup: '+(err?.message||'arquivo inválido')+'.';
-    }
-  }
-
+  async function restoreBackup(file){try{const raw=await file.text(),parsed=JSON.parse(raw),imported=Array.isArray(parsed)?parsed:parsed?.articles;if(!Array.isArray(imported))throw new Error('arquivo sem lista de artigos');const valid=imported.filter(it=>it&&typeof it==='object'&&it.texts&&typeof it.texts==='object');if(!valid.length&&imported.length)throw new Error('nenhum artigo válido encontrado');const current=getBook(),seen=new Set(current.map(it=>String(it.id))),additions=valid.filter(it=>!seen.has(String(it.id)));setBook([...additions,...current].slice(0,100));status.textContent='♻️ Backup restaurado. '+additions.length+' artigo(s) novo(s) adicionado(s) ao Caderno.';document.querySelector('#bookPanel').open=true;}catch(err){status.textContent='⚠️ Não foi possível restaurar o backup: '+(err?.message||'arquivo inválido')+'.';}}
   function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-
-  document.querySelector('#saveArticle').addEventListener('click',()=>{
-    const texts=getTexts(); if(!Object.values(texts).some(Boolean)){status.textContent='Não há artigo para salvar.';return;}
-    const items=getBook(); const id=Date.now();
-    items.unshift({id,title:titleEl.value.trim()||'Artigo sem título',theme:themeEl.value.trim(),date:dateEl.value||new Date().toISOString().slice(0,10),texts});
-    setBook(items.slice(0,100)); status.textContent='⭐ Artigo salvo no Caderno com as quatro versões.'; document.querySelector('#bookPanel').open=true;
-  });
-
-  function renderBook(){
-    const items=getBook();
-    if(!items.length){bookList.innerHTML='<div class="small">Nenhum artigo salvo ainda.</div>';return;}
-    bookList.innerHTML=items.map(it=>`<div class="book-item"><div><strong>${esc(it.title)}</strong><div class="book-meta">${esc(it.date||'')} ${it.theme?'• '+esc(it.theme):''}</div></div><div class="book-actions"><button class="secondary" data-load="${it.id}">Abrir</button><button class="print" data-print="${it.id}">Imprimir</button><button class="danger" data-delete="${it.id}">Excluir</button></div></div>`).join('');
-    bookList.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>loadItem(Number(b.dataset.load)));
-    bookList.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteItem(Number(b.dataset.delete)));
-    bookList.querySelectorAll('[data-print]').forEach(b=>b.onclick=()=>{loadItem(Number(b.dataset.print));document.querySelector('#printPanel').open=true;status.textContent='Escolha o idioma e toque em “Abrir impressão / Salvar PDF”.';});
-  }
+  document.querySelector('#saveArticle').addEventListener('click',()=>{const texts=getTexts();if(!Object.values(texts).some(Boolean)){status.textContent='Não há artigo para salvar.';return;}const items=getBook(),id=Date.now();items.unshift({id,title:titleEl.value.trim()||'Artigo sem título',theme:themeEl.value.trim(),date:dateEl.value||localDate(),texts});setBook(items.slice(0,100));status.textContent='⭐ Artigo salvo no Caderno com as quatro versões.';document.querySelector('#bookPanel').open=true;});
+  function renderBook(){const items=getBook();if(!items.length){bookList.innerHTML='<div class="small">Nenhum artigo salvo ainda.</div>';return;}bookList.innerHTML=items.map(it=>`<div class="book-item"><div><strong>${esc(it.title)}</strong><div class="book-meta">${esc(it.date||'')} ${it.theme?'• '+esc(it.theme):''}</div></div><div class="book-actions"><button class="secondary" data-load="${it.id}">Abrir</button><button class="print" data-print="${it.id}">Imprimir</button><button class="danger" data-delete="${it.id}">Excluir</button></div></div>`).join('');bookList.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>loadItem(Number(b.dataset.load)));bookList.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteItem(Number(b.dataset.delete)));bookList.querySelectorAll('[data-print]').forEach(b=>b.onclick=()=>{loadItem(Number(b.dataset.print));document.querySelector('#printPanel').open=true;status.textContent='Escolha o idioma e toque em “Abrir impressão / Salvar PDF”.';});}
   function loadItem(id){const it=getBook().find(x=>x.id===id);if(!it)return;titleEl.value=it.title||'';themeEl.value=it.theme||'';dateEl.value=it.date||'';setTexts(it.texts||{});status.textContent='⭐ Artigo carregado do Caderno.';window.scrollTo({top:0,behavior:'smooth'});}
   function deleteItem(id){if(!confirm('Excluir este artigo do Caderno?'))return;setBook(getBook().filter(x=>x.id!==id));status.textContent='Artigo excluído do Caderno.';}
-  renderBook(); updateCounts();
+  renderBook();updateCounts();
 
   document.querySelector('#printBtn').addEventListener('click',()=>{document.querySelector('#printPanel').open=true;document.querySelector('#printPanel').scrollIntoView({behavior:'smooth'});});
-  document.querySelector('#doPrint').addEventListener('click',()=>{
-    const choice=document.querySelector('#printLang').value; const texts=getTexts();
-    const langs=choice==='all'?['pt','en','fr','es']:[choice];
-    const pages=langs.filter(l=>texts[l]).map(l=>`<article class="print-page"><div class="print-lang">${langFlags[l]} ${langNames[l]}</div><h1 class="print-title">${esc(titleEl.value.trim()||'4 Idiomas')}</h1><div class="print-meta">${esc(dateEl.value||'')} ${themeEl.value.trim()?'• '+esc(themeEl.value.trim()):''}</div><div class="print-text">${esc(texts[l])}</div></article>`).join('');
-    if(!pages){status.textContent='Não há texto no idioma escolhido para imprimir.';return;}
-    printView.innerHTML=pages; setTimeout(()=>window.print(),120);
-  });
+  document.querySelector('#doPrint').addEventListener('click',()=>{const choice=document.querySelector('#printLang').value,texts=getTexts(),langs=choice==='all'?['pt','en','fr','es']:[choice];const pages=langs.filter(l=>texts[l]).map(l=>`<article class="print-page"><div class="print-lang">${langFlags[l]} ${langNames[l]}</div><h1 class="print-title">${esc(titleEl.value.trim()||'4 Idiomas')}</h1><div class="print-meta">${esc(dateEl.value||'')} ${themeEl.value.trim()?'• '+esc(themeEl.value.trim()):''}</div><div class="print-text">${esc(texts[l])}</div></article>`).join('');if(!pages){status.textContent='Não há texto no idioma escolhido para imprimir.';return;}printView.innerHTML=pages;setTimeout(()=>window.print(),120);});
 
-  function sentences(text){return (text||'').replace(/\n+/g,' ').match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)?.map(s=>s.trim()).filter(s=>s.length>15)||[];}
+  function sentences(text){return(text||'').replace(/\n+/g,' ').match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g)?.map(s=>s.trim()).filter(s=>s.length>15)||[];}
   function random(arr){return arr[Math.floor(Math.random()*arr.length)];}
-  function createExercise(){
-    const type=document.querySelector('#exerciseType').value; const lang=document.querySelector('#exerciseLang').value; const texts=getTexts(); const box=document.querySelector('#exerciseBox');
-    if(!texts[lang]){box.innerHTML='<div class="small">Não há texto em '+langNames[lang]+'. Traduza ou carregue um artigo primeiro.</div>';return;}
-    const sents=sentences(texts[lang]); if(!sents.length){box.innerHTML='<div class="small">O texto ainda é curto demais para gerar exercícios.</div>';return;}
-    let chosenType=type==='surprise'?random(['translate','complete']):type;
-    if(chosenType==='translate'){
-      const sourceLang=lang; const targetCandidates=['pt','en','fr','es'].filter(l=>l!==sourceLang&&texts[l]); const targetLang=random(targetCandidates);
-      if(!targetLang){box.innerHTML='<div class="small">É preciso ter pelo menos dois idiomas preenchidos.</div>';return;}
-      const srcSents=sentences(texts[sourceLang]); const tgtSents=sentences(texts[targetLang]); const idx=Math.min(Math.floor(Math.random()*srcSents.length),Math.max(0,tgtSents.length-1));
-      const q=srcSents[idx]||random(srcSents); const a=tgtSents[idx]||random(tgtSents);
-      box.innerHTML=`<div class="exercise-q">Traduza de ${langNames[sourceLang]} para ${langNames[targetLang]}:</div><div>${esc(q)}</div><div class="exercise-controls"><button class="secondary reveal">Mostrar resposta</button></div><div class="answer">${esc(a)}</div>`;
-    }else{
-      const q=random(sents); const words=q.split(/\s+/).filter(w=>w.replace(/[^A-Za-zÀ-ÿ'-]/g,'').length>=4);
-      if(!words.length){box.innerHTML='<div class="small">Não encontrei uma palavra adequada para ocultar.</div>';return;}
-      const word=random(words); const blank='_____'; const masked=q.replace(word,blank);
-      box.innerHTML=`<div class="exercise-q">Complete a frase em ${langNames[lang]}:</div><div>${esc(masked)}</div><input id="exerciseAnswer" placeholder="Digite a palavra que falta" style="margin-top:10px"><div class="exercise-controls"><button class="secondary check">Verificar</button><button class="secondary reveal">Mostrar resposta</button></div><div class="answer">${esc(word)}</div>`;
-      box.querySelector('.check').onclick=()=>{const v=normalize(box.querySelector('#exerciseAnswer').value);status.textContent=v===normalize(word)?'✓ Resposta correta!':'Ainda não. Tente novamente ou mostre a resposta.';};
-    }
-    box.querySelectorAll('.reveal').forEach(b=>b.onclick=()=>{box.querySelector('.answer').style.display='block';});
-  }
-  document.querySelector('#exerciseBtn').addEventListener('click',()=>{document.querySelector('#exercisePanel').open=true;createExercise();document.querySelector('#exercisePanel').scrollIntoView({behavior:'smooth'});});
-  document.querySelector('#newExercise').addEventListener('click',createExercise);
+  function createExercise(){const type=document.querySelector('#exerciseType').value,lang=document.querySelector('#exerciseLang').value,texts=getTexts(),box=document.querySelector('#exerciseBox');if(!texts[lang]){box.innerHTML='<div class="small">Não há texto em '+langNames[lang]+'. Traduza ou carregue um artigo primeiro.</div>';return;}const sents=sentences(texts[lang]);if(!sents.length){box.innerHTML='<div class="small">O texto ainda é curto demais para gerar exercícios.</div>';return;}const chosen=type==='surprise'?random(['translate','complete']):type;if(chosen==='translate'){const candidates=['pt','en','fr','es'].filter(l=>l!==lang&&texts[l]),target=random(candidates);if(!target){box.innerHTML='<div class="small">É preciso ter pelo menos dois idiomas preenchidos.</div>';return;}const src=sentences(texts[lang]),dst=sentences(texts[target]),idx=Math.min(Math.floor(Math.random()*src.length),Math.max(0,dst.length-1)),q=src[idx]||random(src),a=dst[idx]||random(dst);box.innerHTML=`<div class="exercise-q">Traduza de ${langNames[lang]} para ${langNames[target]}:</div><div>${esc(q)}</div><div class="exercise-controls"><button class="secondary reveal">Mostrar resposta</button></div><div class="answer">${esc(a)}</div>`;}else{const q=random(sents),words=q.split(/\s+/).filter(w=>w.replace(/[^A-Za-zÀ-ÿ'-]/g,'').length>=4);if(!words.length){box.innerHTML='<div class="small">Não encontrei uma palavra adequada para ocultar.</div>';return;}const word=random(words),masked=q.replace(word,'_____');box.innerHTML=`<div class="exercise-q">Complete a frase em ${langNames[lang]}:</div><div>${esc(masked)}</div><input id="exerciseAnswer" placeholder="Digite a palavra que falta" style="margin-top:10px"><div class="exercise-controls"><button class="secondary check">Verificar</button><button class="secondary reveal">Mostrar resposta</button></div><div class="answer">${esc(word)}</div>`;box.querySelector('.check').onclick=()=>{status.textContent=normalize(box.querySelector('#exerciseAnswer').value)===normalize(word)?'✓ Resposta correta!':'Ainda não. Tente novamente ou mostre a resposta.';};}box.querySelectorAll('.reveal').forEach(b=>b.onclick=()=>{box.querySelector('.answer').style.display='block';});}
+  document.querySelector('#exerciseBtn').addEventListener('click',()=>{document.querySelector('#exercisePanel').open=true;createExercise();document.querySelector('#exercisePanel').scrollIntoView({behavior:'smooth'});});document.querySelector('#newExercise').addEventListener('click',createExercise);
 
-  const backupPanel=document.querySelector('#backupPanel');
-  const installPanel=document.querySelector('#installPanel');
-  const restoreFile=document.querySelector('#restoreFile');
+  const backupPanel=document.querySelector('#backupPanel'),installPanel=document.querySelector('#installPanel'),restoreFile=document.querySelector('#restoreFile');
+  document.querySelector('#backupBtn').addEventListener('click',()=>{backupPanel.open=true;backupPanel.scrollIntoView({behavior:'smooth'});status.textContent='💾 Escolha “Fazer backup” para salvar uma cópia do Caderno no tablet.';});document.querySelector('#backupBook').addEventListener('click',makeBackup);document.querySelector('#restoreBook').addEventListener('click',()=>restoreFile.click());restoreFile.addEventListener('change',async()=>{const file=restoreFile.files?.[0];if(file)await restoreBackup(file);restoreFile.value='';});
 
-  document.querySelector('#backupBtn').addEventListener('click',()=>{
-    backupPanel.open=true;
-    backupPanel.scrollIntoView({behavior:'smooth'});
-    status.textContent='💾 Escolha “Fazer backup” para salvar uma cópia do Caderno no tablet.';
-  });
-  document.querySelector('#backupBook').addEventListener('click',makeBackup);
-  document.querySelector('#restoreBook').addEventListener('click',()=>restoreFile.click());
-  restoreFile.addEventListener('change',async()=>{
-    const file=restoreFile.files?.[0];
-    if(file) await restoreBackup(file);
-    restoreFile.value='';
-  });
+  let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;status.textContent='✓ 4 Idiomas instalado. O ícone já pode aparecer na tela inicial do tablet.';});document.querySelector('#installBtn').addEventListener('click',async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();const result=await deferredInstallPrompt.userChoice;status.textContent=result.outcome==='accepted'?'📲 Instalação confirmada. Procure o ícone 4 Idiomas na tela inicial.':'Instalação cancelada. Você pode tentar novamente quando quiser.';deferredInstallPrompt=null;return;}installPanel.open=true;installPanel.scrollIntoView({behavior:'smooth'});status.textContent='📲 No Chrome, toque em ⋮ e escolha “Adicionar à tela inicial” ou “Instalar app”.';});document.querySelector('#showInstallHelp').addEventListener('click',()=>alert('Para criar o ícone do 4 Idiomas no tablet:\n\n1. Abra esta página no Chrome.\n2. Toque no menu ⋮ no canto superior.\n3. Toque em “Adicionar à tela inicial” ou “Instalar app”.\n4. Confirme o nome “4 Idiomas”.'));
 
-  let deferredInstallPrompt=null;
-  window.addEventListener('beforeinstallprompt',e=>{
-    e.preventDefault();
-    deferredInstallPrompt=e;
-  });
-  window.addEventListener('appinstalled',()=>{
-    deferredInstallPrompt=null;
-    status.textContent='✓ 4 Idiomas instalado. O ícone já pode aparecer na tela inicial do tablet.';
-  });
-
-  document.querySelector('#installBtn').addEventListener('click',async()=>{
-    if(deferredInstallPrompt){
-      deferredInstallPrompt.prompt();
-      const result=await deferredInstallPrompt.userChoice;
-      if(result.outcome==='accepted') status.textContent='📲 Instalação confirmada. Procure o ícone 4 Idiomas na tela inicial.';
-      else status.textContent='Instalação cancelada. Você pode tentar novamente quando quiser.';
-      deferredInstallPrompt=null;
-      return;
-    }
-    installPanel.open=true;
-    installPanel.scrollIntoView({behavior:'smooth'});
-    status.textContent='📲 No Chrome, toque em ⋮ e escolha “Adicionar à tela inicial” ou “Instalar app”.';
-  });
-  document.querySelector('#showInstallHelp').addEventListener('click',()=>{
-    alert('Para criar o ícone do 4 Idiomas no tablet:\n\n1. Abra esta página no Chrome.\n2. Toque no menu ⋮ no canto superior.\n3. Toque em “Adicionar à tela inicial” ou “Instalar app”.\n4. Confirme o nome “4 Idiomas”.\n\nDepois disso, o novo ícone azul ficará na tela inicial e abrirá diretamente o aplicativo.');
-  });
-
-  if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{
-      navigator.serviceWorker.register('./service-worker.js').then(reg=>reg.update()).catch(()=>{});
-    });
-  }
+  if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js').then(reg=>reg.update()).catch(()=>{});});}
 })();
 </script>
 </body>
