@@ -155,7 +155,7 @@ A importância de manter a curiosidade
 
 <script>
 (()=>{
-const KEY='quatroIdiomasMusicasEstudadasV1';
+const KEY='quatroIdiomasMusicasEstudadasV1'; 
 let studied={};
 try{studied=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(_){}
 
@@ -183,6 +183,7 @@ document.querySelectorAll('[data-song]').forEach(card=>{
  render();
 });
 const EDIT_KEY='quatroIdiomasMusicaEdicaoV1';
+ document.querySelectorAll('.focus, .grid .vocab, [data-song] .title, [data-song] .artist').forEach(el=>el.setAttribute('contenteditable','true'));
 
 const editaveis=[...document.querySelectorAll('[contenteditable="true"]')];
 
