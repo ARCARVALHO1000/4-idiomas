@@ -182,8 +182,26 @@ document.querySelectorAll('[data-song]').forEach(card=>{
  };
  render();
 });
+const EDIT_KEY='quatroIdiomasMusicaEdicaoV1';
+
+const editaveis=[...document.querySelectorAll('[contenteditable="true"]')];
+
+try{
+  const salvo=JSON.parse(localStorage.getItem(EDIT_KEY)||'[]');
+  editaveis.forEach((el,i)=>{
+    if(salvo[i]!==undefined) el.innerHTML=salvo[i];
+  });
+}catch(e){}
+
+editaveis.forEach(()=>{
+  addEventListener('input',()=>{
+    const dados=editaveis.map(el=>el.innerHTML);
+    localStorage.setItem(EDIT_KEY,JSON.stringify(dados));
+  });
+});
+
 })();
 </script>
 
 </body>
-<gov/html>
+</html>
