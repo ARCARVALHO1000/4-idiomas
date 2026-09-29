@@ -183,6 +183,46 @@ document.querySelectorAll('[data-song]').forEach(card=>{
  render();
 });
 const EDIT_KEY='quatroIdiomasMusicaEdicaoV1';
+ const VIDEO_KEY='quatroIdiomasLinksVideosV1';
+let videoLinks={};
+try{videoLinks=JSON.parse(localStorage.getItem(VIDEO_KEY)||'{}')||{};}catch(e){}
+
+document.querySelectorAll('[data-song]').forEach(card=>{
+  const id=card.dataset.song;
+  const iframe=card.querySelector('iframe');
+  const video=card.querySelector('.video');
+
+  const campo=document.createElement('input');
+  campo.type='text';
+  campo.placeholder='🔗 Cole aqui o link do YouTube';
+  campo.style.cssText='width:100%;margin-top:8px;padding:10px;border:1px solid #d9deea;border-radius:8px;font-size:15px';
+  video.after(campo);
+
+  function trocarVideo(link){
+    let codigo='';
+    try{
+      const u=new URL(link);
+      if(u.hostname.includes('youtu.be')) codigo=u.pathname.slice(1);
+      else codigo=u.searchParams.get('v') ||
+        (u.pathname.includes('/embed/') ? u.pathname.split('/embed/')[1] : '') ||
+        (u.pathname.includes('/shorts/') ? u.pathname.split('/shorts/')[1] : '');
+    }catch(e){}
+
+    if(codigo){
+      codigo=codigo.split(/[?&/]/)[0];
+      iframe.src='https://www.youtube-nocookie.com/embed/'+codigo+'?rel=0';
+      videoLinks[id]=link;
+      localStorage.setItem(VIDEO_KEY,JSON.stringify(videoLinks));
+    }
+  }
+
+  campo.addEventListener('input',()=>trocarVideo(campo.value.trim()));
+
+  if(videoLinks[id]){
+    campo.value=videoLinks[id];
+    trocarVideo(videoLinks[id]);
+  }
+});
  document.querySelectorAll('.focus, .grid .vocab, [data-song] .title, [data-song] .artist').forEach(el=>el.setAttribute('contenteditable','true'));
 
 const editaveis=[...document.querySelectorAll('[contenteditable="true"]')];
