@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4-Idiomas — Gramática Comparada</title>
+<style>
+body{font-family:Arial,sans-serif;background:#101827;color:white;margin:0;padding:18px}
+h1{color:#7dd3fc}
+h2{color:#fde68a}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+a,button{background:#2563eb;color:white;padding:11px;border:0;border-radius:8px;text-decoration:none;cursor:pointer;font-size:15px}
+section{background:#1e293b;padding:15px;border-radius:12px;margin:16px 0}
+label{display:block;margin:12px 0}
+input,textarea,select{width:100%;box-sizing:border-box;background:#0f172a;color:white;border:1px solid #64748b;border-radius:8px;padding:10px;font-size:16px;margin-top:7px}
+textarea{min-height:125px}
+.botoes{display:flex;flex-wrap:wrap;gap:8px}
+#aviso{color:#86efac}
+</style>
+</head>
+<body>
+<h1>📚 Gramática Comparada</h1>
+<p>Projeto 4-Idiomas — Versão 5</p>
+<nav>
+<a href="index.html">Artigos</a>
+<a href="musicas.html">Músicas</a>
+<a href="frases.html">Frases</a>
+<a href="verbo.html">Verbo</a>
+<a href="gramatica.html">Gramática</a>
+<a href="pronuncia.html">Pronúncia</a>
+</nav>
+<section>
+<h2>Estudo do dia</h2>
+<label>Data<input type="date" id="data"></label>
+<label>Assunto
+<select id="assunto">
+<option>Pronomes pessoais</option>
+<option>Artigos</option>
+<option>Preposições</option>
+<option>Advérbios</option>
+<option>Adjetivos</option>
+<option>Substantivos</option>
+<option>Verbos e tempos verbais</option>
+<option>Concordância</option>
+<option>Estrutura das frases</option>
+<option>Outros assuntos</option>
+</select></label>
+<label>Título ou tópico<input id="titulo" placeholder="Ex.: pronomes pessoais do sujeito"></label>
+</section>
+<section>
+<h2>🇧🇷 Português</h2>
+<textarea id="pt" placeholder="Regras, exemplos e observações"></textarea>
+</section>
+<section>
+<h2>🇬🇧 Inglês</h2>
+<textarea id="en" placeholder="Rules, examples and notes"></textarea>
+</section>
+<section>
+<h2>🇫🇷 Francês</h2>
+<textarea id="fr" placeholder="Règles, exemples et remarques"></textarea>
+</section>
+<section>
+<h2>🇪🇸 Espanhol</h2>
+<textarea id="es" placeholder="Reglas, ejemplos y observaciones"></textarea>
+</section>
+<section>
+<h2>Comparação dos quatro idiomas</h2>
+<textarea id="comparacao" placeholder="Semelhanças, diferenças, exceções e dicas"></textarea>
+</section>
+<section>
+<h2>Exercícios e revisão</h2>
+<textarea id="exercicios" placeholder="Exercícios e respostas para revisar depois"></textarea>
+</section>
+<section>
+<div class="botoes">
+<button onclick="salvar()">💾 Salvar estudo</button>
+<button onclick="mudarDia(-1)">◀ Dia anterior</button>
+<button onclick="mudarDia(1)">Próximo dia ▶</button>
+</div>
+<p id="aviso"></p>
+</section>
+<script>
+const campos=["assunto","titulo","pt","en","fr","es","comparacao","exercicios"];
+const data=document.getElementById("data");
+const aviso=document.getElementById("aviso");
+function hoje(){
+ const d=new Date();
+ return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+}
+function chave(){return "4idiomas-v5-gramatica-"+data.value}
+function salvar(){
+ if(!data.value)return;
+ const estudo={};
+ campos.forEach(id=>estudo[id]=document.getElementById(id).value);
+ try{
+  localStorage.setItem(chave(),JSON.stringify(estudo));
+  aviso.textContent="Estudo salvo neste navegador!";
+ }catch(e){aviso.textContent="Não foi possível salvar. Verifique o armazenamento."}
+}
+function carregar(){
+ let estudo={};
+ try{estudo=JSON.parse(localStorage.getItem(chave())||"{}")}catch(e){}
+ campos.forEach(id=>{
+  const campo=document.getElementById(id);
+  campo.value=estudo[id]??(id==="assunto"?"Pronomes pessoais":"");
+ });
+ aviso.textContent=Object.keys(estudo).length?"Estudo recuperado.":"Data selecionada.";
+}
+function mudarDia(dias){
+ if(!data.value)return;
+ salvar();
+ const d=new Date(data.value+"T12:00:00");
+ d.setDate(d.getDate()+dias);
+ data.value=[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+ carregar();
+}
+data.value=hoje();
+data.addEventListener("change",carregar);
+campos.forEach(id=>document.getElementById(id).addEventListener("input",salvar));
+campos.forEach(id=>document.getElementById(id).addEventListener("change",salvar));
+carregar();
+</script>
+</body>
+</html>
