@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4-Idiomas — Frases do Dia</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #101b30;
+    color: white;
+    margin: 0;
+    padding: 18px;
+  }
+  h1 { color: #8fd5ff; }
+  nav { display: flex; flex-wrap: wrap; gap: 8px; }
+  a, button {
+    background: #2673b8;
+    color: white;
+    border: 0;
+    border-radius: 9px;
+    padding: 11px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .frase {
+    background: #1c2d49;
+    padding: 14px;
+    margin: 14px 0;
+    border-radius: 12px;
+  }
+  label { display: block; margin: 9px 0 4px; }
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 65px;
+    padding: 9px;
+    border-radius: 8px;
+    border: 1px solid #58718e;
+    background: #f7faff;
+    color: #17253b;
+    font-size: 16px;
+  }
+  input {
+    padding: 9px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+  small { color: #c6d9eb; }
+</style>
+</head>
+<body>
+<h1>📚 4-Idiomas</h1>
+<h2>Frases do Dia</h2>
+
+<nav>
+  <a href="index.html">🏠 Artigos</a>
+  <a href="musicas-v44.html">🎵 Músicas</a>
+  <a href="verbos.html">📖 Verbos</a>
+  <a href="gramatica.html">📝 Gramática</a>
+  <a href="desafios.html">🎯 Desafios</a>
+</nav>
+
+<p>Escolha a data do estudo:</p>
+<input type="date" id="data">
+<p><small>As alterações são salvas automaticamente neste navegador.</small></p>
+
+<div id="conteudo"></div>
+
+<button onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  ↑ Voltar ao início
+</button>
+
+<script>
+const data = document.getElementById("data");
+const conteudo = document.getElementById("conteudo");
+
+data.value = new Date().toLocaleDateString("en-CA");
+
+const idiomas = [
+  ["pt", "🇧🇷 Português"],
+  ["en", "🇬🇧 Inglês"],
+  ["fr", "🇫🇷 Francês"],
+  ["es", "🇪🇸 Espanhol"]
+];
+
+function chave() {
+  return "4idiomas-v5-frases-" + data.value;
+}
+
+function carregar() {
+  let salvos = {};
+  try {
+    salvos = JSON.parse(localStorage.getItem(chave())) || {};
+  } catch (e) {
+    salvos = {};
+  }
+
+  conteudo.innerHTML = "";
+
+  for (let n = 1; n <= 10; n++) {
+    const bloco = document.createElement("section");
+    bloco.className = "frase";
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = "Frase " + n;
+    bloco.appendChild(titulo);
+
+    for (const [codigo, nome] of idiomas) {
+      const id = "frase-" + n + "-" + codigo;
+      const rotulo = document.createElement("label");
+      rotulo.textContent = nome;
+
+      const campo = document.createElement("textarea");
+      campo.value = salvos[id] || "";
+      campo.placeholder = "Cole a frase aqui";
+      campo.addEventListener("input", salvar);
+
+      rotulo.appendChild(campo);
+      bloco.appendChild(rotulo);
+    }
+    conteudo.appendChild(bloco);
+  }
+}
+
+function salvar() {
+  const valores = {};
+  const campos = conteudo.querySelectorAll("textarea");
+  campos.forEach((campo, indice) => {
+    const numero = Math.floor(indice / 4) + 1;
+    const idioma = idiomas[indice % 4][0];
+    valores["frase-" + numero + "-" + idioma] = campo.value;
+  });
+  localStorage.setItem(chave(), JSON.stringify(valores));
+}
+
+data.addEventListener("change", carregar);
+carregar();
+</script>
+</body>
+</html>
