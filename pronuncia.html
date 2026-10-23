@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4-Idiomas — Pronúncia e Tradução</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 18px;
+      background: #0b1220;
+      color: #f1f5f9;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+    h1 { color: #93c5fd; font-size: 25px; }
+    h2 { color: #fbbf24; font-size: 20px; }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0;
+    }
+    nav a, button {
+      display: inline-block;
+      padding: 10px 12px;
+      background: #2563eb;
+      color: white;
+      border: 0;
+      border-radius: 9px;
+      text-decoration: none;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    section {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #64748b;
+      border-radius: 8px;
+      background: #0f172a;
+      color: white;
+      font: inherit;
+    }
+    textarea { min-height: 100px; }
+    .resposta { display: none; margin-top: 12px; }
+    .aviso { color: #a7f3d0; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <h1>🌍 4-Idiomas — Versão 5</h1>
+  <h2>Pronúncia e Desafio de Tradução</h2>
+
+  <nav>
+    <a href="index.html">📖 Artigos</a>
+    <a href="musicas-v44.html">🎵 Músicas</a>
+    <a href="frases.html">💬 Frases</a>
+    <a href="verbo.html">🔤 Verbo</a>
+    <a href="gramatica.html">📚 Gramática</a>
+    <a href="pronuncia.html">🗣️ Pronúncia</a>
+  </nav>
+
+  <p class="aviso">
+    Seus textos são salvos automaticamente neste navegador.
+  </p>
+
+  <section>
+    <h2>📅 Estudo do dia</h2>
+    <label for="data">Data</label>
+    <input id="data" type="date">
+  </section>
+
+  <section>
+    <h2>🇬🇧 Pronúncia em inglês</h2>
+    <label for="ingles">Palavras, sons e orientações</label>
+    <textarea id="ingles" placeholder="Ex.: think — som do TH"></textarea>
+    <button type="button" onclick="falar('ingles','en-US')">
+      🔊 Ouvir inglês
+    </button>
+  </section>
+
+  <section>
+    <h2>🇫🇷 Pronúncia em francês</h2>
+    <label for="frances">Palavras, sons e orientações</label>
+    <textarea id="frances" placeholder="Ex.: bonjour — bom dia"></textarea>
+    <button type="button" onclick="falar('frances','fr-FR')">
+      🔊 Ouvir francês
+    </button>
+  </section>
+
+  <section>
+    <h2>🇪🇸 Pronúncia em espanhol</h2>
+    <label for="espanhol">Palavras, sons e orientações</label>
+    <textarea id="espanhol" placeholder="Ex.: gracias — obrigado"></textarea>
+    <button type="button" onclick="falar('espanhol','es-ES')">
+      🔊 Ouvir espanhol
+    </button>
+  </section>
+
+  <section>
+    <h2>✍️ Desafio 1 — Tradução</h2>
+    <label for="pergunta1">Frase para traduzir</label>
+    <textarea id="pergunta1"></textarea>
+
+    <label for="tentativa1">Minha tradução</label>
+    <textarea id="tentativa1"></textarea>
+
+    <button type="button" onclick="alternar('resposta1')">
+      Mostrar ou esconder resposta
+    </button>
+
+    <div id="resposta1" class="resposta">
+      <label for="gabarito1">Resposta sugerida</label>
+      <textarea id="gabarito1"></textarea>
+    </div>
+  </section>
+
+  <section>
+    <h2>✍️ Desafio 2 — Tradução</h2>
+    <label for="pergunta2">Frase para traduzir</label>
+    <textarea id="pergunta2"></textarea>
+
+    <label for="tentativa2">Minha tradução</label>
+    <textarea id="tentativa2"></textarea>
+
+    <button type="button" onclick="alternar('resposta2')">
+      Mostrar ou esconder resposta
+    </button>
+
+    <div id="resposta2" class="resposta">
+      <label for="gabarito2">Resposta sugerida</label>
+      <textarea id="gabarito2"></textarea>
+    </div>
+  </section>
+
+  <nav>
+    <a href="gramatica.html">⬅️ Anterior</a>
+    <a href="index.html">🏠 Início</a>
+  </nav>
+
+  <script>
+    const campos = [
+      "ingles", "frances", "espanhol",
+      "pergunta1", "tentativa1", "gabarito1",
+      "pergunta2", "tentativa2", "gabarito2"
+    ];
+
+    const campoData = document.getElementById("data");
+    campoData.value = new Date().toLocaleDateString("en-CA");
+
+    function chave(id) {
+      return "4idiomas-v5-pronuncia-" + campoData.value + "-" + id;
+    }
+
+    function carregar() {
+      campos.forEach(function(id) {
+        document.getElementById(id).value =
+          localStorage.getItem(chave(id)) || "";
+      });
+    }
+
+    campos.forEach(function(id) {
+      document.getElementById(id).addEventListener("input", function() {
+        localStorage.setItem(chave(id), this.value);
+      });
+    });
+
+    campoData.addEventListener("change", carregar);
+    carregar();
+
+    function alternar(id) {
+      const elemento = document.getElementById(id);
+      elemento.style.display =
+        elemento.style.display === "block" ? "none" : "block";
+    }
+
+    function falar(id, idioma) {
+      if (!("speechSynthesis" in window)) {
+        alert("Este navegador não oferece leitura de voz.");
+        return;
+      }
+      const texto = document.getElementById(id).value.trim();
+      if (!texto) {
+        alert("Escreva primeiro uma palavra ou frase.");
+        return;
+      }
+      speechSynthesis.cancel();
+      const voz = new SpeechSynthesisUtterance(texto);
+      voz.lang = idioma;
+      voz.rate = 0.85;
+      speechSynthesis.speak(voz);
+    }
+  </script>
+
+</body>
+</html>
