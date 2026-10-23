@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b30">
+  <title>4-Idiomas — Verbo do Dia</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 18px;
+      background: #101b30;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    main { max-width: 950px; margin: auto; }
+    h1 { color: #91c8ff; }
+    h2 { margin-top: 28px; }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0;
+    }
+    nav a, button {
+      display: inline-block;
+      padding: 12px;
+      background: #2675d8;
+      color: white;
+      border: 0;
+      border-radius: 9px;
+      text-decoration: none;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button.secondary { background: #465a79; }
+    .card {
+      background: #192b49;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #8498b3;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #17253b;
+    }
+    textarea {
+      min-height: 115px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .short { min-height: 75px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .hint { color: #c0d0e5; font-size: 14px; }
+    .status { color: #9ce6b2; font-size: 14px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 9px; }
+    @media (max-width: 650px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>📚 4-Idiomas</h1>
+  <h2>📖 Verbo do Dia</h2>
+
+  <nav aria-label="Páginas do estudo">
+    <a href="index.html">🏠 Artigos</a>
+    <a href="musicas-v44.html">🎵 Músicas</a>
+    <a href="frases.html">💬 Frases</a>
+    <a href="verbos.html">📖 Verbos</a>
+    <a href="gramatica.html">📝 Gramática</a>
+    <a href="desafios.html">🎯 Desafios</a>
+  </nav>
+
+  <div class="card">
+    <label for="data">📅 Data do estudo</label>
+    <input type="date" id="data">
+    <p class="hint">Cada data guarda seu próprio estudo neste navegador.</p>
+    <p id="status" class="status" role="status">Pronto para estudar.</p>
+  </div>
+
+  <div class="card">
+    <h2>🌍 O mesmo verbo em quatro idiomas</h2>
+    <div class="grid">
+      <div>
+        <label for="verbo-pt">🇧🇷 Português</label>
+        <input id="verbo-pt" placeholder="Ex.: resolver">
+      </div>
+      <div>
+        <label for="verbo-en">🇬🇧 Inglês</label>
+        <input id="verbo-en" placeholder="Ex.: to solve">
+      </div>
+      <div>
+        <label for="verbo-fr">🇫🇷 Francês</label>
+        <input id="verbo-fr" placeholder="Ex.: résoudre">
+      </div>
+      <div>
+        <label for="verbo-es">🇪🇸 Espanhol</label>
+        <input id="verbo-es" placeholder="Ex.: resolver">
+      </div>
+    </div>
+  </div>
+
+  <div id="idiomas"></div>
+
+  <div class="card">
+    <h2>🔎 Gramática comparada</h2>
+    <label for="comparacao">Semelhanças e diferenças entre os idiomas</label>
+    <textarea id="comparacao" placeholder="Explique como o verbo é usado em cada idioma."></textarea>
+
+    <label for="dicas">💡 Dicas para memorizar</label>
+    <textarea id="dicas" class="short" placeholder="Anote observações e dificuldades."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="actions">
+      <button id="salvar" type="button">💾 Salvar agora</button>
+      <button id="anterior" class="secondary" type="button">⬅️ Dia anterior</button>
+      <button id="seguinte" class="secondary" type="button">➡️ Próximo dia</button>
+      <button id="limpar" class="secondary" type="button">🧹 Limpar esta data</button>
+    </div>
+    <p class="hint">O salvamento é automático neste dispositivo e navegador. Para não perder os estudos, mantenha também uma cópia de segurança.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  const idiomas = [
+    ["pt", "🇧🇷 Português"],
+    ["en", "🇬🇧 Inglês"],
+    ["fr", "🇫🇷 Francês"],
+    ["es", "🇪🇸 Espanhol"]
+  ];
+
+  const tempos = [
+    ["presente", "Presente"],
+    ["passado", "Passado"],
+    ["futuro", "Futuro"]
+  ];
+
+  const area = document.getElementById("idiomas");
+  const data = document.getElementById("data");
+  const status = document.getElementById("status");
+  const prefixo = "4idiomas-v5-verbo-";
+
+  function criarCampo(id, titulo, alturaCurta) {
+    const label = document.createElement("label");
+    label.htmlFor = id;
+    label.textContent = titulo;
+
+    const campo = document.createElement("textarea");
+    campo.id = id;
+    campo.placeholder = "Cole ou escreva aqui";
+    if (alturaCurta) campo.className = "short";
+
+    return [label, campo];
+  }
+
+  idiomas.forEach(([codigo, nome]) => {
+    const cartao = document.createElement("section");
+    cartao.className = "card";
+
+    const titulo = document.createElement("h2");
+    titulo.textContent = nome;
+    cartao.appendChild(titulo);
+
+    const subtitulo = document.createElement("p");
+    subtitulo.className = "hint";
+    subtitulo.textContent =
+      "Conjugue o verbo e acrescente frases de exemplo.";
+    cartao.appendChild(subtitulo);
+
+    tempos.forEach(([tempo, rotulo]) => {
+      const elementos = criarCampo(
+        codigo + "-" + tempo,
+        rotulo + " — conjugação",
+        false
+      );
+      cartao.append(...elementos);
+    });
+
+    cartao.append(...criarCampo(
+      codigo + "-exemplos",
+      "Frases de exemplo",
+      false
+    ));
+
+    cartao.append(...criarCampo(
+      codigo + "-observacoes",
+      "Observações e pronúncia",
+      true
+    ));
+
+    area.appendChild(cartao);
+  });
+
+  const campos = Array.from(
+    document.querySelectorAll("input:not([type=date]), textarea")
+  );
+
+  function hojeLocal() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, "0");
+    const dia = String(agora.getDate()).padStart(2, "0");
+    return ano + "-" + mes + "-" + dia;
+  }
+
+  function chave() {
+    return prefixo + data.value;
+  }
+
+  function mensagem(texto) {
+    status.textContent = texto;
+  }
+
+  function salvar() {
+    if (!data.value) return;
+    const registro = {};
+    campos.forEach(campo => {
+      registro[campo.id] = campo.value;
+    });
+
+    try {
+      localStorage.setItem(chave(), JSON.stringify(registro));
+      mensagem("✓ Estudo salvo para " + data.value);
+    } catch (erro) {
+      mensagem("Não foi possível salvar. Verifique o armazenamento.");
+    }
+  }
+
+  function carregar() {
+    campos.forEach(campo => campo.value = "");
+
+    try {
+      const texto = localStorage.getItem(chave());
+      if (!texto) {
+        mensagem("Data sem estudo salvo. Pronto para preencher.");
+        return;
+      }
+
+      const registro = JSON.parse(texto);
+      campos.forEach(campo => {
+        campo.value = registro[campo.id] || "";
+      });
+      mensagem("✓ Estudo recuperado de " + data.value);
+    } catch (erro) {
+      mensagem("Não foi possível recuperar o estudo desta data.");
+    }
+  }
+
+  function mudarDia(diferenca) {
+    if (!data.value) return;
+    salvar();
+    const partes = data.value.split("-").map(Number);
+    const dia = new Date(
+      partes[0], partes[1] - 1, partes[2] + diferenca
+    );
+    const ano = dia.getFullYear();
+    const mes = String(dia.getMonth() + 1).padStart(2, "0");
+    const numero = String(dia.getDate()).padStart(2, "0");
+    data.value = ano + "-" + mes + "-" + numero;
+    carregar();
+  }
+
+  let espera;
+
+  campos.forEach(campo => {
+    campo.addEventListener("input", () => {
+      mensagem("Salvando...");
+      clearTimeout(espera);
+      espera = setTimeout(salvar, 400);
+    });
+  });
+
+  data.addEventListener("change", () => {
+    clearTimeout(espera);
+    carregar();
+  });
+
+  document.getElementById("salvar")
+    .addEventListener("click", salvar);
+
+  document.getElementById("anterior")
+    .addEventListener("click", () => mudarDia(-1));
+
+  document.getElementById("seguinte")
+    .addEventListener("click", () => mudarDia(1));
+
+  document.getElementById("limpar")
+    .addEventListener("click", () => {
+      if (!confirm("Apagar o estudo desta data?")) return;
+      try {
+        localStorage.removeItem(chave());
+        carregar();
+        mensagem("Estudo desta data apagado.");
+      } catch (erro) {
+        mensagem("Não foi possível apagar o estudo.");
+      }
+    });
+
+  data.value = hojeLocal();
+  carregar();
+})();
+</script>
+</body>
+</html>
