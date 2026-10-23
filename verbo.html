@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4-Idiomas — Verbo do Dia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #101827;
+      color: white;
+      margin: 0;
+      padding: 18px;
+    }
+    h1 { color: #7dd3fc; }
+    h2 { color: #fde68a; }
+    nav { display: flex; flex-wrap: wrap; gap: 8px; }
+    a, button {
+      background: #2563eb;
+      color: white;
+      padding: 11px;
+      border-radius: 8px;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    section {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    textarea, input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #0f172a;
+      color: white;
+      border: 1px solid #64748b;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+    textarea { min-height: 125px; }
+    label { display: block; margin-top: 12px; }
+    #aviso { color: #86efac; }
+  </style>
+</head>
+<body>
+  <h1>📘 Verbo do Dia</h1>
+  <p>Projeto 4-Idiomas — Versão 5</p>
+
+  <nav>
+    <a href="index.html">Artigos</a>
+    <a href="musicas.html">Músicas</a>
+    <a href="frases.html">Frases</a>
+    <a href="verbo.html">Verbo</a>
+    <a href="gramatica.html">Gramática</a>
+    <a href="pronuncia.html">Pronúncia</a>
+  </nav>
+
+  <section>
+    <h2>Estudo do dia</h2>
+    <label>Data
+      <input type="date" id="data">
+    </label>
+    <label>Verbo em português
+      <input id="verbo" placeholder="Ex.: resolver">
+    </label>
+  </section>
+
+  <section>
+    <h2>🇧🇷 Português</h2>
+    <textarea id="pt" placeholder="Conjugação, exemplos e observações"></textarea>
+  </section>
+
+  <section>
+    <h2>🇬🇧 Inglês</h2>
+    <textarea id="en" placeholder="Verbo, conjugação e exemplos"></textarea>
+  </section>
+
+  <section>
+    <h2>🇫🇷 Francês</h2>
+    <textarea id="fr" placeholder="Verbe, conjugaison et exemples"></textarea>
+  </section>
+
+  <section>
+    <h2>🇪🇸 Espanhol</h2>
+    <textarea id="es" placeholder="Verbo, conjugación y ejemplos"></textarea>
+  </section>
+
+  <section>
+    <h2>Comparação entre os idiomas</h2>
+    <textarea id="comparacao" placeholder="Semelhanças, diferenças e dicas gramaticais"></textarea>
+  </section>
+
+  <section>
+    <button onclick="salvar()">💾 Salvar estudo</button>
+    <button onclick="anterior()">◀ Dia anterior</button>
+    <button onclick="proximo()">Próximo dia ▶</button>
+    <p id="aviso"></p>
+  </section>
+
+  <script>
+    const campos = ["verbo", "pt", "en", "fr", "es", "comparacao"];
+    const data = document.getElementById("data");
+    const aviso = document.getElementById("aviso");
+
+    function hoje() {
+      const d = new Date();
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function chave() {
+      return "4idiomas-v5-verbo-" + data.value;
+    }
+
+    function salvar() {
+      if (!data.value) return;
+      const estudo = {};
+      campos.forEach(id => estudo[id] = document.getElementById(id).value);
+      localStorage.setItem(chave(), JSON.stringify(estudo));
+      aviso.textContent = "Estudo salvo neste navegador!";
+    }
+
+    function carregar() {
+      const estudo = JSON.parse(localStorage.getItem(chave()) || "{}");
+      campos.forEach(id => {
+        document.getElementById(id).value = estudo[id] || "";
+      });
+      aviso.textContent = estudo.verbo ? "Estudo recuperado." : "Data selecionada.";
+    }
+
+    function mudarDia(dias) {
+      if (!data.value) return;
+      salvar();
+      const d = new Date(data.value + "T12:00:00");
+      d.setDate(d.getDate() + dias);
+      data.value = [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, "0"),
+        String(d.getDate()).padStart(2, "0")
+      ].join("-");
+      carregar();
+    }
+
+    function anterior() { mudarDia(-1); }
+    function proximo() { mudarDia(1); }
+
+    data.value = hoje();
+    data.addEventListener("change", carregar);
+    campos.forEach(id => {
+      document.getElementById(id).addEventListener("input", salvar);
+    });
+    carregar();
+  </script>
+</body>
+</html>
