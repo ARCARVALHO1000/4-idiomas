@@ -322,7 +322,7 @@
   function setBook(items){localStorage.setItem(BOOK_KEY,JSON.stringify(items));renderBook();}
   function backupName(){return'4-idiomas-backup-'+localDate()+'.json';}
   async function makeBackup(){
-    const payload={app:'4 Idiomas',version:'4.4',createdAt:new Date().toISOString(),articles:getBook()};const data=JSON.stringify(payload,null,2);const name=backupName();
+    const payload={app:'4 Idiomas',version:'5.0',createdAt:new Date().toISOString(),articles:getBook()};const data=JSON.stringify(payload,null,2);const name=backupName();
     if('showDirectoryPicker'in window){try{const dir=await window.showDirectoryPicker({mode:'readwrite'});const fh=await dir.getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(data);await w.close();status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo na pasta que você escolheu.';return;}catch(err){if(err?.name==='AbortError'){status.textContent='Backup cancelado.';return;}}}
     if('showSaveFilePicker'in window){try{const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:'Backup do 4 Idiomas',accept:{'application/json':['.json']}}]});const w=await h.createWritable();await w.write(data);await w.close();status.textContent='💾 Backup concluído: '+name+'. O arquivo foi salvo no local escolhido.';return;}catch(err){if(err?.name==='AbortError'){status.textContent='Backup cancelado.';return;}}}
     const blob=new Blob([data],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);status.textContent='💾 Backup criado: '+name+'. Procure o arquivo na pasta Downloads do tablet.';
