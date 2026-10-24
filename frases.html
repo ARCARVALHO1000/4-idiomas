@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,137 +5,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>4-Idiomas — Frases do Dia</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #101b30;
-    color: white;
-    margin: 0;
-    padding: 18px;
-  }
-  h1 { color: #8fd5ff; }
-  nav { display: flex; flex-wrap: wrap; gap: 8px; }
-  a, button {
-    background: #2673b8;
-    color: white;
-    border: 0;
-    border-radius: 9px;
-    padding: 11px;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .frase {
-    background: #1c2d49;
-    padding: 14px;
-    margin: 14px 0;
-    border-radius: 12px;
-  }
-  label { display: block; margin: 9px 0 4px; }
-  textarea {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 65px;
-    padding: 9px;
-    border-radius: 8px;
-    border: 1px solid #58718e;
-    background: #f7faff;
-    color: #17253b;
-    font-size: 16px;
-  }
-  input {
-    padding: 9px;
-    font-size: 16px;
-    border-radius: 8px;
-  }
-  small { color: #c6d9eb; }
+body{font-family:Arial,sans-serif;background:#101b30;color:white;margin:0;padding:18px}h1{color:#8fd5ff}nav{display:flex;flex-wrap:wrap;gap:8px}a,button{background:#2673b8;color:white;border:0;border-radius:9px;padding:11px;text-decoration:none;cursor:pointer}button:disabled{opacity:.65;cursor:wait}.frase{background:#1c2d49;padding:14px;margin:14px 0;border-radius:12px}label{display:block;margin:9px 0 4px}textarea{box-sizing:border-box;width:100%;min-height:65px;padding:9px;border-radius:8px;border:1px solid #58718e;background:#f7faff;color:#17253b;font-size:16px}input{padding:9px;font-size:16px;border-radius:8px}.acoes{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.aviso{color:#d5e9ff;font-size:14px;min-height:20px}small{color:#c6d9eb}
 </style>
 </head>
 <body>
-<h1>📚 4-Idiomas</h1>
-<h2>Frases do Dia</h2>
-
-<nav>
-  <a href="index.html">🏠 Artigos</a>
-  <a href="musicas-v44.html">🎵 Músicas</a>
-  <a href="verbos.html">📖 Verbos</a>
-  <a href="gramatica.html">📝 Gramática</a>
-  <a href="pronuncia.html">🎯 Desafios</a>
-</nav>
-
-<p>Escolha a data do estudo:</p>
-<input type="date" id="data">
-<p><small>As alterações são salvas automaticamente neste navegador.</small></p>
-
+<h1>📚 4-Idiomas</h1><h2>Frases do Dia</h2>
+<nav><a href="index.html">🏠 Artigos</a><a href="musicas-v44.html">🎵 Músicas</a><a href="verbos.html">📖 Verbos</a><a href="gramatica.html">📝 Gramática</a><a href="pronuncia.html">🎯 Desafios</a></nav>
+<p>Escolha a data do estudo:</p><input type="date" id="data">
+<div class="acoes"><button type="button" id="anterior">⬅️ Dia anterior</button><button type="button" id="proximo">Próximo dia ➡️</button></div>
+<p><small>Escreva uma frase em português e toque em Traduzir. As frases são salvas automaticamente neste navegador. A tradução requer internet.</small></p>
 <div id="conteudo"></div>
-
-<button onclick="window.scrollTo({top:0,behavior:'smooth'})">
-  ↑ Voltar ao início
-</button>
-
+<button onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Voltar ao início</button>
 <script>
-const data = document.getElementById("data");
-const conteudo = document.getElementById("conteudo");
-
-data.value = new Date().toLocaleDateString("en-CA");
-
-const idiomas = [
-  ["pt", "🇧🇷 Português"],
-  ["en", "🇬🇧 Inglês"],
-  ["fr", "🇫🇷 Francês"],
-  ["es", "🇪🇸 Espanhol"]
-];
-
-function chave() {
-  return "4idiomas-v5-frases-" + data.value;
+const data=document.getElementById('data');
+const conteudo=document.getElementById('conteudo');
+const idiomas=[['pt','🇧🇷 Português'],['en','🇬🇧 Inglês'],['fr','🇫🇷 Francês'],['es','🇪🇸 Espanhol']];
+const hoje=new Date();
+data.value=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-'+String(hoje.getDate()).padStart(2,'0');
+function chave(){return '4idiomas-v5-frases-'+data.value}
+function ler(){try{return JSON.parse(localStorage.getItem(chave()))||{}}catch(e){return {}}}
+function salvar(){const valores={};conteudo.querySelectorAll('textarea[data-id]').forEach(c=>valores[c.dataset.id]=c.value);try{localStorage.setItem(chave(),JSON.stringify(valores))}catch(e){}}
+function mudarDia(delta){const p=data.value.split('-').map(Number);if(p.length!==3)return;const d=new Date(p[0],p[1]-1,p[2]+delta);data.value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');carregar()}
+document.getElementById('anterior').addEventListener('click',()=>mudarDia(-1));
+document.getElementById('proximo').addEventListener('click',()=>mudarDia(1));
+async function traduzir(texto,idioma){
+ const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(texto)+'&langpair=pt-BR%7C'+encodeURIComponent(idioma);
+ const resposta=await fetch(url,{method:'GET'});
+ if(!resposta.ok)throw Error('Serviço indisponível');
+ const json=await resposta.json();
+ if(Number(json.responseStatus)!==200||!json.responseData||!json.responseData.translatedText)throw Error('Tradução indisponível');
+ return json.responseData.translatedText;
 }
-
-function carregar() {
-  let salvos = {};
-  try {
-    salvos = JSON.parse(localStorage.getItem(chave())) || {};
-  } catch (e) {
-    salvos = {};
+function carregar(){
+ const salvos=ler();conteudo.replaceChildren();
+ for(let n=1;n<=10;n++){
+  const bloco=document.createElement('section');bloco.className='frase';
+  const titulo=document.createElement('h3');titulo.textContent='Frase '+n;bloco.appendChild(titulo);
+  const campos={};
+  for(const [codigo,nome] of idiomas){
+   const id='frase-'+n+'-'+codigo;
+   const rotulo=document.createElement('label');rotulo.textContent=nome;
+   const campo=document.createElement('textarea');campo.dataset.id=id;campo.value=salvos[id]||'';
+   campo.placeholder=codigo==='pt'?'Escreva a frase em português':'A tradução aparecerá aqui (você também pode editar)';
+   campo.addEventListener('input',salvar);rotulo.appendChild(campo);bloco.appendChild(rotulo);campos[codigo]=campo;
   }
-
-  conteudo.innerHTML = "";
-
-  for (let n = 1; n <= 10; n++) {
-    const bloco = document.createElement("section");
-    bloco.className = "frase";
-
-    const titulo = document.createElement("h3");
-    titulo.textContent = "Frase " + n;
-    bloco.appendChild(titulo);
-
-    for (const [codigo, nome] of idiomas) {
-      const id = "frase-" + n + "-" + codigo;
-      const rotulo = document.createElement("label");
-      rotulo.textContent = nome;
-
-      const campo = document.createElement("textarea");
-      campo.value = salvos[id] || "";
-      campo.placeholder = "Cole a frase aqui";
-      campo.addEventListener("input", salvar);
-
-      rotulo.appendChild(campo);
-      bloco.appendChild(rotulo);
-    }
-    conteudo.appendChild(bloco);
-  }
-}
-
-function salvar() {
-  const valores = {};
-  const campos = conteudo.querySelectorAll("textarea");
-  campos.forEach((campo, indice) => {
-    const numero = Math.floor(indice / 4) + 1;
-    const idioma = idiomas[indice % 4][0];
-    valores["frase-" + numero + "-" + idioma] = campo.value;
+  const acoes=document.createElement('div');acoes.className='acoes';
+  const botao=document.createElement('button');botao.type='button';botao.textContent='🌐 Traduzir para os 3 idiomas';
+  const aviso=document.createElement('div');aviso.className='aviso';aviso.setAttribute('role','status');
+  botao.addEventListener('click',async()=>{
+   const texto=campos.pt.value.trim();if(!texto){aviso.textContent='Escreva primeiro a frase em português.';return}
+   if(texto.length>450){aviso.textContent='Use uma frase de até 450 caracteres.';return}
+   const dia=data.value;botao.disabled=true;aviso.textContent='Traduzindo...';
+   const resultados=await Promise.allSettled([traduzir(texto,'en'),traduzir(texto,'fr'),traduzir(texto,'es')]);
+   if(data.value!==dia||!bloco.isConnected)return;
+   let ok=0;['en','fr','es'].forEach((codigo,i)=>{if(resultados[i].status==='fulfilled'){campos[codigo].value=resultados[i].value;ok++}});
+   salvar();botao.disabled=false;
+   aviso.textContent=ok===3?'✅ Traduções preenchidas e salvas.':ok>0?'⚠️ Algumas traduções não foram concluídas. Tente novamente.':'⚠️ Não foi possível traduzir agora. Verifique a internet e tente novamente.';
   });
-  localStorage.setItem(chave(), JSON.stringify(valores));
+  acoes.appendChild(botao);bloco.appendChild(acoes);bloco.appendChild(aviso);conteudo.appendChild(bloco);
+ }
 }
-
-data.addEventListener("change", carregar);
-carregar();
+data.addEventListener('change',carregar);carregar();
 </script>
 </body>
 </html>
