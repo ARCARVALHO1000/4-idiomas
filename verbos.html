@@ -1,326 +1,261 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101b30">
-  <title>4-Idiomas — Verbo do Dia</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 18px;
-      background: #101b30;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    main { max-width: 950px; margin: auto; }
-    h1 { color: #91c8ff; }
-    h2 { margin-top: 28px; }
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 18px 0;
-    }
-    nav a, button {
-      display: inline-block;
-      padding: 12px;
-      background: #2675d8;
-      color: white;
-      border: 0;
-      border-radius: 9px;
-      text-decoration: none;
-      font-size: 15px;
-      cursor: pointer;
-    }
-    button.secondary { background: #465a79; }
-    .card {
-      background: #192b49;
-      border-radius: 14px;
-      padding: 16px;
-      margin: 16px 0;
-    }
-    label {
-      display: block;
-      margin: 12px 0 6px;
-      font-weight: bold;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid #8498b3;
-      border-radius: 8px;
-      font-size: 16px;
-      font-family: Arial, sans-serif;
-      background: #fff;
-      color: #17253b;
-    }
-    textarea {
-      min-height: 115px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-    .short { min-height: 75px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-    .hint { color: #c0d0e5; font-size: 14px; }
-    .status { color: #9ce6b2; font-size: 14px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 9px; }
-    @media (max-width: 650px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4-Idiomas — Verbo do Dia</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:#101b30;color:#fff;font-family:Arial,sans-serif}
+main{max-width:950px;margin:auto}
+h1{color:#91c8ff}
+nav,.botoes{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+nav a,button{background:#2675d8;color:white;border:0;border-radius:9px;padding:11px;text-decoration:none;font-size:15px}
+section{background:#192b49;border-radius:14px;padding:16px;margin:15px 0}
+label{display:block;margin:12px 0 5px;font-weight:bold}
+input,textarea{width:100%;padding:10px;border:1px solid #8498b3;border-radius:8px;background:white;color:#17253b;font-size:16px}
+textarea{min-height:110px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.dica{color:#c0d0e5;font-size:14px}
+#status{color:#9ce6b2}
+@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <main>
-  <h1>📚 4-Idiomas</h1>
-  <h2>📖 Verbo do Dia</h2>
-
-  <nav aria-label="Páginas do estudo">
-    <a href="index.html">🏠 Artigos</a>
-    <a href="musicas-v44.html">🎵 Músicas</a>
-    <a href="frases.html">💬 Frases</a>
-    <a href="verbos.html">📖 Verbos</a>
-    <a href="gramatica.html">📝 Gramática</a>
-    <a href="pronuncia.html">🎯 Desafios</a>
-  </nav>
-
-  <div class="card">
-    <label for="data">📅 Data do estudo</label>
-    <input type="date" id="data">
-    <p class="hint">Cada data guarda seu próprio estudo neste navegador.</p>
-    <p id="status" class="status" role="status">Pronto para estudar.</p>
-  </div>
-
-  <div class="card">
-    <h2>🌍 O mesmo verbo em quatro idiomas</h2>
-    <div class="grid">
-      <div>
-        <label for="verbo-pt">🇧🇷 Português</label>
-        <input id="verbo-pt" placeholder="Ex.: resolver">
-      </div>
-      <div>
-        <label for="verbo-en">🇬🇧 Inglês</label>
-        <input id="verbo-en" placeholder="Ex.: to solve">
-      </div>
-      <div>
-        <label for="verbo-fr">🇫🇷 Francês</label>
-        <input id="verbo-fr" placeholder="Ex.: résoudre">
-      </div>
-      <div>
-        <label for="verbo-es">🇪🇸 Espanhol</label>
-        <input id="verbo-es" placeholder="Ex.: resolver">
-      </div>
-    </div>
-  </div>
-
-  <div id="idiomas"></div>
-
-  <div class="card">
-    <h2>🔎 Gramática comparada</h2>
-    <label for="comparacao">Semelhanças e diferenças entre os idiomas</label>
-    <textarea id="comparacao" placeholder="Explique como o verbo é usado em cada idioma."></textarea>
-
-    <label for="dicas">💡 Dicas para memorizar</label>
-    <textarea id="dicas" class="short" placeholder="Anote observações e dificuldades."></textarea>
-  </div>
-
-  <div class="card">
-    <div class="actions">
-      <button id="salvar" type="button">💾 Salvar agora</button>
-      <button id="anterior" class="secondary" type="button">⬅️ Dia anterior</button>
-      <button id="seguinte" class="secondary" type="button">➡️ Próximo dia</button>
-      <button id="limpar" class="secondary" type="button">🧹 Limpar esta data</button>
-    </div>
-    <p class="hint">O salvamento é automático neste dispositivo e navegador. Para não perder os estudos, mantenha também uma cópia de segurança.</p>
-  </div>
+<h1>📚 4-Idiomas</h1>
+<h2>📖 Verbo do Dia</h2>
+<nav>
+<a href="index.html">🏠 Artigos</a>
+<a href="musicas-v44.html">🎵 Músicas</a>
+<a href="frases.html">💬 Frases</a>
+<a href="verbos.html">📖 Verbos</a>
+<a href="gramatica.html">📝 Gramática</a>
+<a href="pronuncia.html">🎯 Desafios</a>
+</nav>
+<section>
+<label>📅 Data do estudo</label>
+<input type="date" id="data">
+<div class="botoes">
+<button onclick="mudarDia(-1)">⬅️ Dia anterior</button>
+<button onclick="mudarDia(1)">Próximo dia ➡️</button>
+</div>
+<p class="dica">Lições preparadas aparecem automaticamente. Suas alterações são salvas neste navegador.</p>
+<p id="status"></p>
+</section>
+<section>
+<h2>🌍 O mesmo verbo em quatro idiomas</h2>
+<div class="grid">
+<div><label>🇧🇷 Português</label><input id="verbo-pt"></div>
+<div><label>🇬🇧 Inglês</label><input id="verbo-en"></div>
+<div><label>🇫🇷 Francês</label><input id="verbo-fr"></div>
+<div><label>🇪🇸 Espanhol</label><input id="verbo-es"></div>
+</div>
+</section>
+<div id="idiomas"></div>
+<section>
+<h2>🔎 Gramática comparada</h2>
+<label>Semelhanças e diferenças</label>
+<textarea id="comparacao"></textarea>
+<label>💡 Dicas para memorizar</label>
+<textarea id="dicas"></textarea>
+</section>
+<section>
+<button onclick="salvar()">💾 Salvar agora</button>
+<button onclick="restaurar()">🔄 Restaurar lição preparada</button>
+</section>
 </main>
-
 <script>
-(function () {
-  "use strict";
+const nomes=[
+["pt","🇧🇷 Português"],
+["en","🇬🇧 Inglês"],
+["fr","🇫🇷 Francês"],
+["es","🇪🇸 Espanhol"]
+];
+const tempos=["presente","passado","futuro"];
+const banco=[
+{
+v:["estudar","to study","étudier","estudiar"],
+pt:["Eu estudo\nVocê estuda\nNós estudamos\nEles estudam","Eu estudei\nVocê estudou\nNós estudamos\nEles estudaram","Eu estudarei\nVocê estudará\nNós estudaremos\nEles estudarão","Eu estudo todos os dias."],
+en:["I study\nYou study\nWe study\nThey study","I studied\nYou studied\nWe studied\nThey studied","I will study\nYou will study\nWe will study\nThey will study","I study every day."],
+fr:["J'étudie\nTu étudies\nNous étudions\nIls étudient","J'ai étudié\nTu as étudié\nNous avons étudié\nIls ont étudié","J'étudierai\nTu étudieras\nNous étudierons\nIls étudieront","J'étudie tous les jours."],
+es:["Yo estudio\nTú estudias\nNosotros estudiamos\nEllos estudian","Yo estudié\nTú estudiaste\nNosotros estudiamos\nEllos estudiaron","Yo estudiaré\nTú estudiarás\nNosotros estudiaremos\nEllos estudiarán","Estudio todos los días."],
+c:"O inglês usa studied no passado e will study no futuro. O francês usa o auxiliar avoir no passado composto. Português e espanhol apresentam terminações semelhantes.",
+d:"Study → studied. Étudier → j'ai étudié."
+},
+{
+v:["aprender","to learn","apprendre","aprender"],
+pt:["Eu aprendo\nVocê aprende\nNós aprendemos\nEles aprendem","Eu aprendi\nVocê aprendeu\nNós aprendemos\nEles aprenderam","Eu aprenderei\nVocê aprenderá\nNós aprenderemos\nEles aprenderão","Eu aprendo novas palavras."],
+en:["I learn\nYou learn\nWe learn\nThey learn","I learned\nYou learned\nWe learned\nThey learned","I will learn\nYou will learn\nWe will learn\nThey will learn","I learn new words."],
+fr:["J'apprends\nTu apprends\nNous apprenons\nIls apprennent","J'ai appris\nTu as appris\nNous avons appris\nIls ont appris","J'apprendrai\nTu apprendras\nNous apprendrons\nIls apprendront","J'apprends de nouveaux mots."],
+es:["Yo aprendo\nTú aprendes\nNosotros aprendemos\nEllos aprenden","Yo aprendí\nTú aprendiste\nNosotros aprendimos\nEllos aprendieron","Yo aprenderé\nTú aprenderás\nNosotros aprenderemos\nEllos aprenderán","Aprendo palabras nuevas."],
+c:"Learn tem passado learned (também learnt). O francês apprendre tem o particípio appris.",
+d:"Learn → learned. Apprendre → appris."
+},
+{
+v:["falar","to speak","parler","hablar"],
+pt:["Eu falo\nVocê fala\nNós falamos\nEles falam","Eu falei\nVocê falou\nNós falamos\nEles falaram","Eu falarei\nVocê falará\nNós falaremos\nEles falarão","Eu falo português."],
+en:["I speak\nYou speak\nWe speak\nThey speak","I spoke\nYou spoke\nWe spoke\nThey spoke","I will speak\nYou will speak\nWe will speak\nThey will speak","I speak Portuguese."],
+fr:["Je parle\nTu parles\nNous parlons\nIls parlent","J'ai parlé\nTu as parlé\nNous avons parlé\nIls ont parlé","Je parlerai\nTu parleras\nNous parlerons\nIls parleront","Je parle portugais."],
+es:["Yo hablo\nTú hablas\nNosotros hablamos\nEllos hablan","Yo hablé\nTú hablaste\nNosotros hablamos\nEllos hablaron","Yo hablaré\nTú hablarás\nNosotros hablaremos\nEllos hablarán","Hablo portugués."],
+c:"Speak é irregular: speak, spoke, spoken. Parler e hablar seguem padrões regulares.",
+d:"Speak → spoke → spoken."
+},
+{
+v:["escrever","to write","écrire","escribir"],
+pt:["Eu escrevo\nVocê escreve\nNós escrevemos\nEles escrevem","Eu escrevi\nVocê escreveu\nNós escrevemos\nEles escreveram","Eu escreverei\nVocê escreverá\nNós escreveremos\nEles escreverão","Eu escrevo uma frase."],
+en:["I write\nYou write\nWe write\nThey write","I wrote\nYou wrote\nWe wrote\nThey wrote","I will write\nYou will write\nWe will write\nThey will write","I write a sentence."],
+fr:["J'écris\nTu écris\nNous écrivons\nIls écrivent","J'ai écrit\nTu as écrit\nNous avons écrit\nIls ont écrit","J'écrirai\nTu écriras\nNous écrirons\nIls écriront","J'écris une phrase."],
+es:["Yo escribo\nTú escribes\nNosotros escribimos\nEllos escriben","Yo escribí\nTú escribiste\nNosotros escribimos\nEllos escribieron","Yo escribiré\nTú escribirás\nNosotros escribiremos\nEllos escribirán","Escribo una frase."],
+c:"Write é irregular: write, wrote, written. Écrire apresenta alterações de radical.",
+d:"Write → wrote → written."
+},
+{
+v:["ler","to read","lire","leer"],
+pt:["Eu leio\nVocê lê\nNós lemos\nEles leem","Eu li\nVocê leu\nNós lemos\nEles leram","Eu lerei\nVocê lerá\nNós leremos\nEles lerão","Eu leio um artigo."],
+en:["I read\nYou read\nWe read\nThey read","I read\nYou read\nWe read\nThey read","I will read\nYou will read\nWe will read\nThey will read","I read an article."],
+fr:["Je lis\nTu lis\nNous lisons\nIls lisent","J'ai lu\nTu as lu\nNous avons lu\nIls ont lu","Je lirai\nTu liras\nNous lirons\nIls liront","Je lis un article."],
+es:["Yo leo\nTú lees\nNosotros leemos\nEllos leen","Yo leí\nTú leíste\nNosotros leímos\nEllos leyeron","Yo leeré\nTú leerás\nNosotros leeremos\nEllos leerán","Leo un artículo."],
+c:"Read tem a mesma escrita no presente e passado, mas pronúncia diferente. Em francês, o particípio é lu.",
+d:"Read: presente /riːd/, passado /rɛd/."
+},
+{
+v:["compreender","to understand","comprendre","comprender"],
+pt:["Eu compreendo\nVocê compreende\nNós compreendemos\nEles compreendem","Eu compreendi\nVocê compreendeu\nNós compreendemos\nEles compreenderam","Eu compreenderei\nVocê compreenderá\nNós compreenderemos\nEles compreenderão","Eu compreendo a pergunta."],
+en:["I understand\nYou understand\nWe understand\nThey understand","I understood\nYou understood\nWe understood\nThey understood","I will understand\nYou will understand\nWe will understand\nThey will understand","I understand the question."],
+fr:["Je comprends\nTu comprends\nNous comprenons\nIls comprennent","J'ai compris\nTu as compris\nNous avons compris\nIls ont compris","Je comprendrai\nTu comprendras\nNous comprendrons\nIls comprendront","Je comprends la question."],
+es:["Yo comprendo\nTú comprendes\nNosotros comprendemos\nEllos comprenden","Yo comprendí\nTú comprendiste\nNosotros comprendimos\nEllos comprendieron","Yo comprenderé\nTú comprenderás\nNosotros comprenderemos\nEllos comprenderán","Comprendo la pregunta."],
+c:"Understand tem passado understood. Em francês, comprendre apresenta particípio compris.",
+d:"Understand → understood. Comprendre → compris."
+},
+{
+v:["viver","to live","vivre","vivir"],
+pt:["Eu vivo\nVocê vive\nNós vivemos\nEles vivem","Eu vivi\nVocê viveu\nNós vivemos\nEles viveram","Eu viverei\nVocê viverá\nNós viveremos\nEles viverão","Eu vivo com esperança."],
+en:["I live\nYou live\nWe live\nThey live","I lived\nYou lived\nWe lived\nThey lived","I will live\nYou will live\nWe will live\nThey will live","I live with hope."],
+fr:["Je vis\nTu vis\nNous vivons\nIls vivent","J'ai vécu\nTu as vécu\nNous avons vécu\nIls ont vécu","Je vivrai\nTu vivras\nNous vivrons\nIls vivront","Je vis avec espoir."],
+es:["Yo vivo\nTú vives\nNosotros vivimos\nEllos viven","Yo viví\nTú viviste\nNosotros vivimos\nEllos vivieron","Yo viviré\nTú vivirás\nNosotros viviremos\nEllos vivirán","Vivo con esperanza."],
+c:"Live é regular: lived. Vivre é irregular e tem particípio vécu.",
+d:"Live → lived. Vivre → vécu."
+}
+];
 
-  const idiomas = [
-    ["pt", "🇧🇷 Português"],
-    ["en", "🇬🇧 Inglês"],
-    ["fr", "🇫🇷 Francês"],
-    ["es", "🇪🇸 Espanhol"]
-  ];
+const area=document.getElementById("idiomas");
+const data=document.getElementById("data");
+const status=document.getElementById("status");
+const prefixo="4idiomas-v5-verbo-";
+let carregando=false;
+let espera;
 
-  const tempos = [
-    ["presente", "Presente"],
-    ["passado", "Passado"],
-    ["futuro", "Futuro"]
-  ];
+nomes.forEach(([codigo,nome])=>{
+ const sec=document.createElement("section");
+ const h=document.createElement("h2");
+ h.textContent=nome;
+ sec.appendChild(h);
+ tempos.forEach(tempo=>{
+  const label=document.createElement("label");
+  label.textContent=tempo.charAt(0).toUpperCase()+tempo.slice(1)+" — conjugação";
+  const campo=document.createElement("textarea");
+  campo.id=codigo+"-"+tempo;
+  sec.append(label,campo);
+ });
+ const label=document.createElement("label");
+ label.textContent="Frases de exemplo";
+ const exemplo=document.createElement("textarea");
+ exemplo.id=codigo+"-exemplos";
+ sec.append(label,exemplo);
+ const obsLabel=document.createElement("label");
+ obsLabel.textContent="Observações e pronúncia";
+ const obs=document.createElement("textarea");
+ obs.id=codigo+"-observacoes";
+ sec.append(obsLabel,obs);
+ area.appendChild(sec);
+});
 
-  const area = document.getElementById("idiomas");
-  const data = document.getElementById("data");
-  const status = document.getElementById("status");
-  const prefixo = "4idiomas-v5-verbo-";
+const campos=Array.from(document.querySelectorAll("input:not([type=date]),textarea"));
 
-  function criarCampo(id, titulo, alturaCurta) {
-    const label = document.createElement("label");
-    label.htmlFor = id;
-    label.textContent = titulo;
-
-    const campo = document.createElement("textarea");
-    campo.id = id;
-    campo.placeholder = "Cole ou escreva aqui";
-    if (alturaCurta) campo.className = "short";
-
-    return [label, campo];
-  }
-
-  idiomas.forEach(([codigo, nome]) => {
-    const cartao = document.createElement("section");
-    cartao.className = "card";
-
-    const titulo = document.createElement("h2");
-    titulo.textContent = nome;
-    cartao.appendChild(titulo);
-
-    const subtitulo = document.createElement("p");
-    subtitulo.className = "hint";
-    subtitulo.textContent =
-      "Conjugue o verbo e acrescente frases de exemplo.";
-    cartao.appendChild(subtitulo);
-
-    tempos.forEach(([tempo, rotulo]) => {
-      const elementos = criarCampo(
-        codigo + "-" + tempo,
-        rotulo + " — conjugação",
-        false
-      );
-      cartao.append(...elementos);
-    });
-
-    cartao.append(...criarCampo(
-      codigo + "-exemplos",
-      "Frases de exemplo",
-      false
-    ));
-
-    cartao.append(...criarCampo(
-      codigo + "-observacoes",
-      "Observações e pronúncia",
-      true
-    ));
-
-    area.appendChild(cartao);
+function hoje(){
+ const d=new Date();
+ return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+}
+function chave(){return prefixo+data.value}
+function indice(){
+ const p=data.value.split("-").map(Number);
+ const n=Math.floor(Date.UTC(p[0],p[1]-1,p[2])/86400000);
+ return ((n%banco.length)+banco.length)%banco.length;
+}
+function preencher(){
+ const l=banco[indice()];
+ nomes.forEach(([codigo],i)=>{
+  document.getElementById("verbo-"+codigo).value=l.v[i];
+  tempos.forEach((tempo,j)=>{
+   document.getElementById(codigo+"-"+tempo).value=l[codigo][j];
   });
-
-  const campos = Array.from(
-    document.querySelectorAll("input:not([type=date]), textarea")
-  );
-
-  function hojeLocal() {
-    const agora = new Date();
-    const ano = agora.getFullYear();
-    const mes = String(agora.getMonth() + 1).padStart(2, "0");
-    const dia = String(agora.getDate()).padStart(2, "0");
-    return ano + "-" + mes + "-" + dia;
-  }
-
-  function chave() {
-    return prefixo + data.value;
-  }
-
-  function mensagem(texto) {
-    status.textContent = texto;
-  }
-
-  function salvar() {
-    if (!data.value) return;
-    const registro = {};
-    campos.forEach(campo => {
-      registro[campo.id] = campo.value;
-    });
-
-    try {
-      localStorage.setItem(chave(), JSON.stringify(registro));
-      mensagem("✓ Estudo salvo para " + data.value);
-    } catch (erro) {
-      mensagem("Não foi possível salvar. Verifique o armazenamento.");
+  document.getElementById(codigo+"-exemplos").value=l[codigo][3];
+  document.getElementById(codigo+"-observacoes").value="";
+ });
+ document.getElementById("comparacao").value=l.c;
+ document.getElementById("dicas").value=l.d;
+}
+function salvar(){
+ if(carregando||!data.value)return;
+ const registro={};
+ campos.forEach(c=>registro[c.id]=c.value);
+ try{
+  localStorage.setItem(chave(),JSON.stringify(registro));
+  status.textContent="✓ Estudo salvo para "+data.value;
+ }catch(e){
+  status.textContent="Não foi possível salvar.";
+ }
+}
+function carregar(){
+ if(!data.value)return;
+ clearTimeout(espera);
+ carregando=true;
+ preencher();
+ try{
+  const registro=JSON.parse(localStorage.getItem(chave())||"null");
+  if(registro){
+   campos.forEach(c=>{
+    if(Object.prototype.hasOwnProperty.call(registro,c.id)){
+     c.value=registro[c.id];
     }
+   });
+   status.textContent="✓ Estudo recuperado.";
+  }else{
+   status.textContent="✓ Lição preenchida automaticamente.";
   }
-
-  function carregar() {
-    campos.forEach(campo => campo.value = "");
-
-    try {
-      const texto = localStorage.getItem(chave());
-      if (!texto) {
-        mensagem("Data sem estudo salvo. Pronto para preencher.");
-        return;
-      }
-
-      const registro = JSON.parse(texto);
-      campos.forEach(campo => {
-        campo.value = registro[campo.id] || "";
-      });
-      mensagem("✓ Estudo recuperado de " + data.value);
-    } catch (erro) {
-      mensagem("Não foi possível recuperar o estudo desta data.");
-    }
-  }
-
-  function mudarDia(diferenca) {
-    if (!data.value) return;
-    salvar();
-    const partes = data.value.split("-").map(Number);
-    const dia = new Date(
-      partes[0], partes[1] - 1, partes[2] + diferenca
-    );
-    const ano = dia.getFullYear();
-    const mes = String(dia.getMonth() + 1).padStart(2, "0");
-    const numero = String(dia.getDate()).padStart(2, "0");
-    data.value = ano + "-" + mes + "-" + numero;
-    carregar();
-  }
-
-  let espera;
-
-  campos.forEach(campo => {
-    campo.addEventListener("input", () => {
-      mensagem("Salvando...");
-      clearTimeout(espera);
-      espera = setTimeout(salvar, 400);
-    });
-  });
-
-  data.addEventListener("change", () => {
-    clearTimeout(espera);
-    carregar();
-  });
-
-  document.getElementById("salvar")
-    .addEventListener("click", salvar);
-
-  document.getElementById("anterior")
-    .addEventListener("click", () => mudarDia(-1));
-
-  document.getElementById("seguinte")
-    .addEventListener("click", () => mudarDia(1));
-
-  document.getElementById("limpar")
-    .addEventListener("click", () => {
-      if (!confirm("Apagar o estudo desta data?")) return;
-      try {
-        localStorage.removeItem(chave());
-        carregar();
-        mensagem("Estudo desta data apagado.");
-      } catch (erro) {
-        mensagem("Não foi possível apagar o estudo.");
-      }
-    });
-
-  data.value = hojeLocal();
-  carregar();
-})();
+ }catch(e){
+  status.textContent="✓ Lição preparada.";
+ }
+ carregando=false;
+}
+function mudarDia(n){
+ if(!data.value)return;
+ clearTimeout(espera);
+ salvar();
+ const p=data.value.split("-").map(Number);
+ const d=new Date(p[0],p[1]-1,p[2]+n,12);
+ data.value=[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+ carregar();
+}
+function restaurar(){
+ if(!confirm("Substituir suas alterações pela lição preparada?"))return;
+ carregando=true;
+ preencher();
+ carregando=false;
+ salvar();
+}
+campos.forEach(c=>{
+ c.addEventListener("input",()=>{
+  if(carregando)return;
+  clearTimeout(espera);
+  espera=setTimeout(salvar,400);
+ });
+});
+data.addEventListener("change",carregar);
+data.value=hoje();
+carregar();
 </script>
 </body>
 </html>
