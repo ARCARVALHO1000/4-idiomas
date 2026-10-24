@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,20 +6,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>4-Idiomas — Gramática Comparada</title>
 <style>
+*{box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#101827;color:white;margin:0;padding:18px}
+main{max-width:960px;margin:auto}
 h1{color:#7dd3fc}
 h2{color:#fde68a}
-nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
-a,button{background:#2563eb;color:white;padding:11px;border:0;border-radius:8px;text-decoration:none;cursor:pointer;font-size:15px}
+nav,.botoes{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+nav a,button{background:#2563eb;color:white;padding:11px;border:0;border-radius:8px;text-decoration:none;cursor:pointer;font-size:15px}
 section{background:#1e293b;padding:15px;border-radius:12px;margin:16px 0}
 label{display:block;margin:12px 0}
-input,textarea,select{width:100%;box-sizing:border-box;background:#0f172a;color:white;border:1px solid #64748b;border-radius:8px;padding:10px;font-size:16px;margin-top:7px}
-textarea{min-height:125px}
-.botoes{display:flex;flex-wrap:wrap;gap:8px}
+input,textarea,select{width:100%;background:#0f172a;color:white;border:1px solid #64748b;border-radius:8px;padding:10px;font-size:16px;margin-top:7px}
+textarea{min-height:150px;line-height:1.5}
 #aviso{color:#86efac}
+.dica{color:#cbd5e1;font-size:14px}
 </style>
 </head>
 <body>
+<main>
 <h1>📚 Gramática Comparada</h1>
 <p>Projeto 4-Idiomas — Versão 5</p>
 <nav>
@@ -29,9 +33,18 @@ textarea{min-height:125px}
 <a href="gramatica.html">Gramática</a>
 <a href="pronuncia.html">Pronúncia</a>
 </nav>
+
 <section>
-<h2>Estudo do dia</h2>
-<label>Data<input type="date" id="data"></label>
+<h2>📅 Estudo do dia</h2>
+<label>Data
+<input type="date" id="data">
+</label>
+<div class="botoes">
+<button type="button" onclick="mudarDia(-1)">⬅️ Dia anterior</button>
+<button type="button" onclick="mudarDia(1)">Próximo dia ➡️</button>
+</div>
+<p class="dica">Uma lição preparada aparece automaticamente para cada data. Suas anotações são guardadas neste navegador.</p>
+<p id="aviso"></p>
 <label>Assunto
 <select id="assunto">
 <option>Pronomes pessoais</option>
@@ -44,80 +57,203 @@ textarea{min-height:125px}
 <option>Concordância</option>
 <option>Estrutura das frases</option>
 <option>Outros assuntos</option>
-</select></label>
-<label>Título ou tópico<input id="titulo" placeholder="Ex.: pronomes pessoais do sujeito"></label>
+</select>
+</label>
+<label>Título ou tópico
+<input id="titulo">
+</label>
 </section>
+
 <section>
 <h2>🇧🇷 Português</h2>
-<textarea id="pt" placeholder="Regras, exemplos e observações"></textarea>
+<textarea id="pt"></textarea>
 </section>
 <section>
 <h2>🇬🇧 Inglês</h2>
-<textarea id="en" placeholder="Rules, examples and notes"></textarea>
+<textarea id="en"></textarea>
 </section>
 <section>
 <h2>🇫🇷 Francês</h2>
-<textarea id="fr" placeholder="Règles, exemples et remarques"></textarea>
+<textarea id="fr"></textarea>
 </section>
 <section>
 <h2>🇪🇸 Espanhol</h2>
-<textarea id="es" placeholder="Reglas, ejemplos y observaciones"></textarea>
+<textarea id="es"></textarea>
 </section>
 <section>
-<h2>Comparação dos quatro idiomas</h2>
-<textarea id="comparacao" placeholder="Semelhanças, diferenças, exceções e dicas"></textarea>
+<h2>🔎 Comparação dos quatro idiomas</h2>
+<textarea id="comparacao"></textarea>
 </section>
 <section>
-<h2>Exercícios e revisão</h2>
-<textarea id="exercicios" placeholder="Exercícios e respostas para revisar depois"></textarea>
+<h2>✏️ Exercícios e revisão</h2>
+<textarea id="exercicios"></textarea>
 </section>
 <section>
 <div class="botoes">
-<button onclick="salvar()">💾 Salvar estudo</button>
-<button onclick="mudarDia(-1)">◀ Dia anterior</button>
-<button onclick="mudarDia(1)">Próximo dia ▶</button>
+<button type="button" onclick="salvar()">💾 Salvar estudo</button>
+<button type="button" onclick="restaurar()">🔄 Restaurar lição preparada</button>
 </div>
-<p id="aviso"></p>
 </section>
+</main>
+
 <script>
+const banco=[
+{
+assunto:"Pronomes pessoais",
+titulo:"Pronomes pessoais do sujeito",
+pt:"Os pronomes substituem nomes.\nEu estudo.\nVocê aprende.\nNós conversamos.\nEles leem.",
+en:"Subject pronouns: I, you, he, she, it, we, they.\nI study.\nYou learn.\nWe talk.\nThey read.",
+fr:"Pronoms sujets : je, tu, il, elle, nous, vous, ils, elles.\nJ'étudie.\nTu apprends.\nNous parlons.\nIls lisent.",
+es:"Pronombres personales: yo, tú, él, ella, nosotros, vosotros, ellos.\nYo estudio.\nTú aprendes.\nNosotros hablamos.\nEllos leen.",
+comparacao:"Em inglês, o pronome sujeito normalmente é obrigatório.\nEm português e espanhol, ele pode ser omitido quando o verbo identifica a pessoa.\nEm francês, normalmente também é obrigatório.",
+exercicios:"1. Traduza: Nós estudamos.\n2. Traduza: She reads.\n3. Complete: ___ parle français. (Eu)\n\nRespostas:\n1. We study / Nous étudions / Nosotros estudiamos.\n2. Ela lê.\n3. Je."
+},
+{
+assunto:"Artigos",
+titulo:"Artigos definidos e indefinidos",
+pt:"Definidos: o, a, os, as.\nIndefinidos: um, uma, uns, umas.\nO livro é interessante.\nUma menina estuda.",
+en:"Definite article: the.\nIndefinite articles: a, an.\nThe book is interesting.\nA girl studies.\nAn apple is red.",
+fr:"Articles définis : le, la, l', les.\nIndéfinis : un, une, des.\nLe livre est intéressant.\nUne fille étudie.",
+es:"Artículos definidos: el, la, los, las.\nIndefinidos: un, una, unos, unas.\nEl libro es interesante.\nUna niña estudia.",
+comparacao:"O inglês usa the sem distinguir masculino e feminino.\nFrancês, português e espanhol distinguem gênero e número.\nEm inglês, an é usado antes de som vocálico.",
+exercicios:"1. Complete: ___ apple.\n2. Traduza: O livro.\n3. Complete em francês: ___ fille. (a menina)\n\nRespostas:\n1. An apple.\n2. The book / Le livre / El libro.\n3. La fille."
+},
+{
+assunto:"Preposições",
+titulo:"Preposições de lugar",
+pt:"Em: Estou em casa.\nSobre: O livro está sobre a mesa.\nDebaixo de: O gato está debaixo da cadeira.",
+en:"In: I am in the room.\nOn: The book is on the table.\nUnder: The cat is under the chair.",
+fr:"Dans : Je suis dans la chambre.\nSur : Le livre est sur la table.\nSous : Le chat est sous la chaise.",
+es:"En: Estoy en la habitación.\nSobre: El libro está sobre la mesa.\nDebajo de: El gato está debajo de la silla.",
+comparacao:"In, dans e en podem indicar localização interna, mas os usos variam conforme a expressão.\nOn e sur geralmente indicam contato com uma superfície.\nAs preposições nem sempre têm tradução literal.",
+exercicios:"1. Traduza: O livro está sobre a mesa.\n2. Complete: The cat is ___ the chair. (debaixo)\n\nRespostas:\n1. The book is on the table.\n2. Under."
+},
+{
+assunto:"Advérbios",
+titulo:"Advérbios de frequência",
+pt:"Sempre, frequentemente, às vezes, nunca.\nEu sempre estudo.\nNós às vezes caminhamos.",
+en:"Always, often, sometimes, never.\nI always study.\nWe sometimes walk.",
+fr:"Toujours, souvent, parfois, jamais.\nJ'étudie toujours.\nNous marchons parfois.",
+es:"Siempre, a menudo, a veces, nunca.\nYo siempre estudio.\nNosotros a veces caminamos.",
+comparacao:"Em inglês, advérbios como always costumam vir antes do verbo principal.\nEm francês, souvent e toujours geralmente aparecem depois do verbo simples.\nA posição varia entre os idiomas.",
+exercicios:"1. Traduza: I always study.\n2. Como se diz 'nunca' em francês?\n3. Traduza: Às vezes.\n\nRespostas:\n1. Eu sempre estudo.\n2. Jamais.\n3. Sometimes / Parfois / A veces."
+},
+{
+assunto:"Adjetivos",
+titulo:"Posição e concordância dos adjetivos",
+pt:"O adjetivo pode concordar em gênero e número.\nUma casa bonita.\nDois livros interessantes.",
+en:"Adjectives do not change for gender or number.\nA beautiful house.\nTwo interesting books.",
+fr:"Les adjectifs s'accordent souvent en genre et en nombre.\nUne belle maison.\nDeux livres intéressants.",
+es:"Los adjetivos concuerdan en género y número.\nUna casa bonita.\nDos libros interesantes.",
+comparacao:"Em inglês, o adjetivo geralmente vem antes do substantivo e não muda de forma.\nEm português e espanhol, frequentemente vem depois.\nEm francês, a posição depende do adjetivo.",
+exercicios:"1. Traduza: Uma casa bonita.\n2. Qual idioma usa beautiful sem alteração no plural?\n\nRespostas:\n1. A beautiful house / Une belle maison / Una casa bonita.\n2. Inglês."
+},
+{
+assunto:"Verbos e tempos verbais",
+titulo:"Presente, passado e futuro",
+pt:"Presente: Eu estudo.\nPassado: Eu estudei.\nFuturo: Eu estudarei.",
+en:"Present: I study.\nPast: I studied.\nFuture: I will study.",
+fr:"Présent : J'étudie.\nPassé composé : J'ai étudié.\nFutur simple : J'étudierai.",
+es:"Presente: Yo estudio.\nPasado: Yo estudié.\nFuturo: Yo estudiaré.",
+comparacao:"O futuro em inglês frequentemente usa will + verbo.\nEm português, francês e espanhol existem formas de futuro com terminações próprias.\nO francês usa muito o passé composé para ações passadas.",
+exercicios:"1. Passe para o futuro: I study.\n2. Traduza: Eu estudei.\n3. Complete: J'___ étudié.\n\nRespostas:\n1. I will study.\n2. I studied / J'ai étudié / Yo estudié.\n3. Ai."
+},
+{
+assunto:"Estrutura das frases",
+titulo:"Frases afirmativas, negativas e interrogativas",
+pt:"Afirmação: Você estuda.\nNegação: Você não estuda.\nPergunta: Você estuda?",
+en:"Affirmative: You study.\nNegative: You do not study.\nQuestion: Do you study?",
+fr:"Affirmation : Tu étudies.\nNégation : Tu n'étudies pas.\nQuestion : Est-ce que tu étudies ?",
+es:"Afirmación: Tú estudias.\nNegación: Tú no estudias.\nPregunta: ¿Tú estudias?",
+comparacao:"Em inglês, perguntas no presente simples geralmente usam do ou does.\nEm francês, a negação padrão envolve ne...pas.\nEm espanhol, a pergunta usa sinais de abertura e fechamento.",
+exercicios:"1. Faça uma pergunta: You study.\n2. Negue: Tu étudies.\n3. Negue: Tú estudias.\n\nRespostas:\n1. Do you study?\n2. Tu n'étudies pas.\n3. Tú no estudias."
+}
+];
+
 const campos=["assunto","titulo","pt","en","fr","es","comparacao","exercicios"];
 const data=document.getElementById("data");
 const aviso=document.getElementById("aviso");
+let carregando=false;
+let espera;
+
 function hoje(){
  const d=new Date();
  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
 }
-function chave(){return "4idiomas-v5-gramatica-"+data.value}
+function chave(){
+ return "4idiomas-v5-gramatica-"+data.value;
+}
+function indice(){
+ const p=data.value.split("-").map(Number);
+ const n=Math.floor(Date.UTC(p[0],p[1]-1,p[2])/86400000);
+ return ((n%banco.length)+banco.length)%banco.length;
+}
+function preencher(){
+ const l=banco[indice()];
+ campos.forEach(id=>{
+  document.getElementById(id).value=l[id];
+ });
+}
 function salvar(){
- if(!data.value)return;
+ if(carregando||!data.value)return;
  const estudo={};
  campos.forEach(id=>estudo[id]=document.getElementById(id).value);
  try{
   localStorage.setItem(chave(),JSON.stringify(estudo));
-  aviso.textContent="Estudo salvo neste navegador!";
- }catch(e){aviso.textContent="Não foi possível salvar. Verifique o armazenamento."}
+  aviso.textContent="✓ Estudo salvo para "+data.value;
+ }catch(e){
+  aviso.textContent="Não foi possível salvar.";
+ }
 }
 function carregar(){
- let estudo={};
- try{estudo=JSON.parse(localStorage.getItem(chave())||"{}")}catch(e){}
- campos.forEach(id=>{
-  const campo=document.getElementById(id);
-  campo.value=estudo[id]??(id==="assunto"?"Pronomes pessoais":"");
- });
- aviso.textContent=Object.keys(estudo).length?"Estudo recuperado.":"Data selecionada.";
+ if(!data.value)return;
+ clearTimeout(espera);
+ carregando=true;
+ preencher();
+ let estudo=null;
+ try{
+  estudo=JSON.parse(localStorage.getItem(chave())||"null");
+ }catch(e){}
+ if(estudo){
+  campos.forEach(id=>{
+   if(Object.prototype.hasOwnProperty.call(estudo,id)
+      && estudo[id]!=="" && estudo[id]!=null){
+    document.getElementById(id).value=estudo[id];
+   }
+  });
+  aviso.textContent="✓ Lição preparada e anotações recuperadas.";
+ }else{
+  aviso.textContent="✓ Lição preenchida automaticamente.";
+ }
+ carregando=false;
 }
 function mudarDia(dias){
  if(!data.value)return;
+ clearTimeout(espera);
  salvar();
- const d=new Date(data.value+"T12:00:00");
- d.setDate(d.getDate()+dias);
+ const p=data.value.split("-").map(Number);
+ const d=new Date(p[0],p[1]-1,p[2]+dias,12);
  data.value=[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
  carregar();
 }
-data.value=hoje();
+function restaurar(){
+ if(!confirm("Substituir as anotações desta data pela lição preparada?"))return;
+ carregando=true;
+ preencher();
+ carregando=false;
+ salvar();
+}
 data.addEventListener("change",carregar);
-campos.forEach(id=>document.getElementById(id).addEventListener("input",salvar));
-campos.forEach(id=>document.getElementById(id).addEventListener("change",salvar));
+campos.forEach(id=>{
+ const c=document.getElementById(id);
+ c.addEventListener("input",()=>{
+  if(carregando)return;
+  clearTimeout(espera);
+  espera=setTimeout(salvar,400);
+ });
+ c.addEventListener("change",salvar);
+});
+data.value=hoje();
 carregar();
 </script>
 </body>
