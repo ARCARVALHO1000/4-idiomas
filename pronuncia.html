@@ -2,209 +2,241 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>4-Idiomas — Pronúncia e Tradução</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 18px;
-      background: #0b1220;
-      color: #f1f5f9;
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-    }
-    h1 { color: #93c5fd; font-size: 25px; }
-    h2 { color: #fbbf24; font-size: 20px; }
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 18px 0;
-    }
-    nav a, button {
-      display: inline-block;
-      padding: 10px 12px;
-      background: #2563eb;
-      color: white;
-      border: 0;
-      border-radius: 9px;
-      text-decoration: none;
-      font-size: 15px;
-      cursor: pointer;
-    }
-    section {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 0;
-    }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: bold;
-    }
-    textarea, input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      border: 1px solid #64748b;
-      border-radius: 8px;
-      background: #0f172a;
-      color: white;
-      font: inherit;
-    }
-    textarea { min-height: 100px; }
-    .resposta { display: none; margin-top: 12px; }
-    .aviso { color: #a7f3d0; font-size: 14px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4-Idiomas — Pronúncia e Desafios</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:18px;background:#0b1220;color:#f1f5f9;font-family:Arial,sans-serif;line-height:1.6}
+h1{color:#93c5fd;font-size:25px}
+h2{color:#fbbf24;font-size:20px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+nav a,button{display:inline-block;padding:10px 12px;background:#2563eb;color:white;border:0;border-radius:9px;text-decoration:none;font-size:15px;cursor:pointer;margin-top:8px}
+section{background:#1e293b;border-radius:12px;padding:16px;margin:16px 0}
+label{display:block;margin-top:12px;font-weight:bold}
+textarea,input{width:100%;padding:12px;margin-top:6px;border:1px solid #64748b;border-radius:8px;background:#0f172a;color:white;font:inherit}
+textarea{min-height:95px}
+.resposta{display:none;margin-top:12px}
+.aviso{color:#a7f3d0;font-size:14px}
+.exemplo{background:#172f48;padding:12px;border-radius:8px}
+</style>
 </head>
 <body>
 
-  <h1>🌍 4-Idiomas — Versão 5</h1>
-  <h2>Pronúncia e Desafio de Tradução</h2>
+<h1>🌍 4-Idiomas — Versão 5</h1>
+<h2>Pronúncia e Desafio de Tradução</h2>
 
-  <nav>
-    <a href="index.html">📖 Artigos</a>
-    <a href="musicas-v44.html">🎵 Músicas</a>
-    <a href="frases.html">💬 Frases</a>
-    <a href="verbos.html">🔤 Verbo</a>
-    <a href="gramatica.html">📚 Gramática</a>
-    <a href="pronuncia.html">🗣️ Pronúncia</a>
-  </nav>
+<nav>
+<a href="index.html">📖 Artigos</a>
+<a href="musicas-v44.html">🎵 Músicas</a>
+<a href="frases.html">💬 Frases</a>
+<a href="verbos.html">🔤 Verbo</a>
+<a href="gramatica.html">📚 Gramática</a>
+<a href="pronuncia.html">🗣️ Pronúncia</a>
+</nav>
 
-  <p class="aviso">
-    Seus textos são salvos automaticamente neste navegador.
-  </p>
+<p class="aviso">Exercícios preparados por dia. Seus textos pessoais são salvos automaticamente neste navegador.</p>
 
-  <section>
-    <h2>📅 Estudo do dia</h2>
-    <label for="data">Data</label>
-    <input id="data" type="date">
-  </section>
+<section>
+<h2>📅 Estudo do dia</h2>
+<label for="data">Data</label>
+<input id="data" type="date">
+</section>
 
-  <section>
-    <h2>🇬🇧 Pronúncia em inglês</h2>
-    <label for="ingles">Palavras, sons e orientações</label>
-    <textarea id="ingles" placeholder="Ex.: think — som do TH"></textarea>
-    <button type="button" onclick="falar('ingles','en-US')">
-      🔊 Ouvir inglês
-    </button>
-  </section>
+<section>
+<h2>🇬🇧 Pronúncia em inglês</h2>
+<p class="exemplo" id="exemplo-ingles"></p>
+<button onclick="ouvirExemplo('ingles','en-US')">🔊 Ouvir exercício</button>
+<label for="ingles">Minha frase ou palavra</label>
+<textarea id="ingles" placeholder="Escreva aqui outra frase para praticar"></textarea>
+<button onclick="ouvirTexto('ingles','en-US')">🔊 Ouvir minha frase</button>
+</section>
 
-  <section>
-    <h2>🇫🇷 Pronúncia em francês</h2>
-    <label for="frances">Palavras, sons e orientações</label>
-    <textarea id="frances" placeholder="Ex.: bonjour — bom dia"></textarea>
-    <button type="button" onclick="falar('frances','fr-FR')">
-      🔊 Ouvir francês
-    </button>
-  </section>
+<section>
+<h2>🇫🇷 Pronúncia em francês</h2>
+<p class="exemplo" id="exemplo-frances"></p>
+<button onclick="ouvirExemplo('frances','fr-FR')">🔊 Ouvir exercício</button>
+<label for="frances">Minha frase ou palavra</label>
+<textarea id="frances" placeholder="Escreva aqui outra frase para praticar"></textarea>
+<button onclick="ouvirTexto('frances','fr-FR')">🔊 Ouvir minha frase</button>
+</section>
 
-  <section>
-    <h2>🇪🇸 Pronúncia em espanhol</h2>
-    <label for="espanhol">Palavras, sons e orientações</label>
-    <textarea id="espanhol" placeholder="Ex.: gracias — obrigado"></textarea>
-    <button type="button" onclick="falar('espanhol','es-ES')">
-      🔊 Ouvir espanhol
-    </button>
-  </section>
+<section>
+<h2>🇪🇸 Pronúncia em espanhol</h2>
+<p class="exemplo" id="exemplo-espanhol"></p>
+<button onclick="ouvirExemplo('espanhol','es-ES')">🔊 Ouvir exercício</button>
+<label for="espanhol">Minha frase ou palavra</label>
+<textarea id="espanhol" placeholder="Escreva aqui outra frase para praticar"></textarea>
+<button onclick="ouvirTexto('espanhol','es-ES')">🔊 Ouvir minha frase</button>
+</section>
 
-  <section>
-    <h2>✍️ Desafio 1 — Tradução</h2>
-    <label for="pergunta1">Frase para traduzir</label>
-    <textarea id="pergunta1"></textarea>
+<section>
+<h2>✍️ Desafio 1 — Tradução</h2>
+<label for="pergunta1">Frase para traduzir</label>
+<textarea id="pergunta1" readonly></textarea>
+<label for="tentativa1">Minha tradução</label>
+<textarea id="tentativa1" placeholder="Escreva sua tradução antes de conferir"></textarea>
+<button onclick="alternar('resposta1')">👁️ Mostrar ou esconder resposta</button>
+<div id="resposta1" class="resposta">
+<label for="gabarito1">Resposta sugerida</label>
+<textarea id="gabarito1" readonly></textarea>
+</div>
+</section>
 
-    <label for="tentativa1">Minha tradução</label>
-    <textarea id="tentativa1"></textarea>
+<section>
+<h2>✍️ Desafio 2 — Tradução</h2>
+<label for="pergunta2">Frase para traduzir</label>
+<textarea id="pergunta2" readonly></textarea>
+<label for="tentativa2">Minha tradução</label>
+<textarea id="tentativa2" placeholder="Escreva sua tradução antes de conferir"></textarea>
+<button onclick="alternar('resposta2')">👁️ Mostrar ou esconder resposta</button>
+<div id="resposta2" class="resposta">
+<label for="gabarito2">Resposta sugerida</label>
+<textarea id="gabarito2" readonly></textarea>
+</div>
+</section>
 
-    <button type="button" onclick="alternar('resposta1')">
-      Mostrar ou esconder resposta
-    </button>
+<nav>
+<a href="gramatica.html">⬅️ Anterior</a>
+<a href="index.html">🏠 Início</a>
+</nav>
 
-    <div id="resposta1" class="resposta">
-      <label for="gabarito1">Resposta sugerida</label>
-      <textarea id="gabarito1"></textarea>
-    </div>
-  </section>
+<script>
+const estudos=[
+{
+ingles:"Good morning, my friend!",
+frances:"Bonjour, mon ami !",
+espanhol:"¡Buenos días, amigo mío!",
+pergunta1:"Knowledge is the key to progress.",
+gabarito1:"O conhecimento é a chave para o progresso.",
+pergunta2:"Learning a language opens new doors.",
+gabarito2:"Aprender um idioma abre novas portas."
+},
+{
+ingles:"Practice makes progress possible.",
+frances:"La pratique nous aide à progresser.",
+espanhol:"La práctica nos ayuda a progresar.",
+pergunta1:"Small steps lead to great achievements.",
+gabarito1:"Pequenos passos levam a grandes conquistas.",
+pergunta2:"I enjoy learning something new.",
+gabarito2:"Gosto de aprender algo novo."
+},
+{
+ingles:"Never stop being curious.",
+frances:"N'arrêtez jamais d'être curieux.",
+espanhol:"Nunca dejes de sentir curiosidad.",
+pergunta1:"Reading helps us understand the world.",
+gabarito1:"A leitura nos ajuda a compreender o mundo.",
+pergunta2:"Every day is a chance to improve.",
+gabarito2:"Cada dia é uma oportunidade de melhorar."
+},
+{
+ingles:"Listen carefully and repeat slowly.",
+frances:"Écoutez attentivement et répétez lentement.",
+espanhol:"Escucha con atención y repite despacio.",
+pergunta1:"Mistakes are part of learning.",
+gabarito1:"Os erros fazem parte da aprendizagem.",
+pergunta2:"We learn more when we share knowledge.",
+gabarito2:"Aprendemos mais quando compartilhamos conhecimento."
+},
+{
+ingles:"Today I will learn with joy.",
+frances:"Aujourd'hui, j'apprendrai avec joie.",
+espanhol:"Hoy aprenderé con alegría.",
+pergunta1:"Learning connects people and cultures.",
+gabarito1:"Aprender conecta pessoas e culturas.",
+pergunta2:"Patience and dedication bring results.",
+gabarito2:"A paciência e a dedicação trazem resultados."
+},
+{
+ingles:"I believe in lifelong learning.",
+frances:"Je crois à l'apprentissage tout au long de la vie.",
+espanhol:"Creo en el aprendizaje durante toda la vida.",
+pergunta1:"Hope gives us strength to continue.",
+gabarito1:"A esperança nos dá força para continuar.",
+pergunta2:"We can always begin again.",
+gabarito2:"Sempre podemos recomeçar."
+},
+{
+ingles:"Every day brings a new opportunity.",
+frances:"Chaque jour apporte une nouvelle occasion.",
+espanhol:"Cada día trae una nueva oportunidad.",
+pergunta1:"Kindness makes the world better.",
+gabarito1:"A bondade torna o mundo melhor.",
+pergunta2:"The future begins with today's choices.",
+gabarito2:"O futuro começa com as escolhas de hoje."
+}
+];
 
-  <section>
-    <h2>✍️ Desafio 2 — Tradução</h2>
-    <label for="pergunta2">Frase para traduzir</label>
-    <textarea id="pergunta2"></textarea>
+const campos=["ingles","frances","espanhol","tentativa1","tentativa2"];
+const data=document.getElementById("data");
+const agora=new Date();
+data.value=agora.getFullYear()+"-"+String(agora.getMonth()+1).padStart(2,"0")+"-"+String(agora.getDate()).padStart(2,"0");
 
-    <label for="tentativa2">Minha tradução</label>
-    <textarea id="tentativa2"></textarea>
+function chave(id){
+return "4idiomas-v5-pronuncia-"+data.value+"-"+id;
+}
 
-    <button type="button" onclick="alternar('resposta2')">
-      Mostrar ou esconder resposta
-    </button>
+function exercicio(){
+const numero=Math.floor(Date.parse(data.value+"T12:00:00Z")/86400000);
+return estudos[((numero%estudos.length)+estudos.length)%estudos.length];
+}
 
-    <div id="resposta2" class="resposta">
-      <label for="gabarito2">Resposta sugerida</label>
-      <textarea id="gabarito2"></textarea>
-    </div>
-  </section>
+function carregar(){
+if(!data.value)return;
+const e=exercicio();
+["ingles","frances","espanhol"].forEach(id=>{
+document.getElementById("exemplo-"+id).textContent=e[id];
+});
+["pergunta1","pergunta2","gabarito1","gabarito2"].forEach(id=>{
+document.getElementById(id).value=e[id];
+});
+campos.forEach(id=>{
+document.getElementById(id).value=localStorage.getItem(chave(id))||"";
+});
+["resposta1","resposta2"].forEach(id=>{
+document.getElementById(id).style.display="none";
+});
+}
 
-  <nav>
-    <a href="gramatica.html">⬅️ Anterior</a>
-    <a href="index.html">🏠 Início</a>
-  </nav>
+campos.forEach(id=>{
+document.getElementById(id).addEventListener("input",function(){
+localStorage.setItem(chave(id),this.value);
+});
+});
 
-  <script>
-    const campos = [
-      "ingles", "frances", "espanhol",
-      "pergunta1", "tentativa1", "gabarito1",
-      "pergunta2", "tentativa2", "gabarito2"
-    ];
+data.addEventListener("change",carregar);
+carregar();
 
-    const campoData = document.getElementById("data");
-    campoData.value = new Date().toLocaleDateString("en-CA");
+function alternar(id){
+const elemento=document.getElementById(id);
+elemento.style.display=elemento.style.display==="block"?"none":"block";
+}
 
-    function chave(id) {
-      return "4idiomas-v5-pronuncia-" + campoData.value + "-" + id;
-    }
+function falar(texto,idioma){
+if(!("speechSynthesis" in window)){
+alert("Este navegador não oferece leitura de voz.");
+return;
+}
+if(!texto.trim()){
+alert("Escreva primeiro uma palavra ou frase.");
+return;
+}
+speechSynthesis.cancel();
+const voz=new SpeechSynthesisUtterance(texto);
+voz.lang=idioma;
+voz.rate=0.85;
+speechSynthesis.speak(voz);
+}
 
-    function carregar() {
-      campos.forEach(function(id) {
-        document.getElementById(id).value =
-          localStorage.getItem(chave(id)) || "";
-      });
-    }
+function ouvirExemplo(id,idioma){
+falar(document.getElementById("exemplo-"+id).textContent,idioma);
+}
 
-    campos.forEach(function(id) {
-      document.getElementById(id).addEventListener("input", function() {
-        localStorage.setItem(chave(id), this.value);
-      });
-    });
-
-    campoData.addEventListener("change", carregar);
-    carregar();
-
-    function alternar(id) {
-      const elemento = document.getElementById(id);
-      elemento.style.display =
-        elemento.style.display === "block" ? "none" : "block";
-    }
-
-    function falar(id, idioma) {
-      if (!("speechSynthesis" in window)) {
-        alert("Este navegador não oferece leitura de voz.");
-        return;
-      }
-      const texto = document.getElementById(id).value.trim();
-      if (!texto) {
-        alert("Escreva primeiro uma palavra ou frase.");
-        return;
-      }
-      speechSynthesis.cancel();
-      const voz = new SpeechSynthesisUtterance(texto);
-      voz.lang = idioma;
-      voz.rate = 0.85;
-      speechSynthesis.speak(voz);
-    }
-  </script>
+function ouvirTexto(id,idioma){
+falar(document.getElementById(id).value,idioma);
+}
+</script>
 
 </body>
 </html>
