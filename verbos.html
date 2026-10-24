@@ -218,7 +218,9 @@ function carregar(){
   if(registro){
    campos.forEach(c=>{
     if(Object.prototype.hasOwnProperty.call(registro,c.id)){
-     c.value=registro[c.id];
+     
+if(registro[c.id] !== "") c.value=registro[c.id];
+
     }
    });
    status.textContent="✓ Estudo recuperado.";
