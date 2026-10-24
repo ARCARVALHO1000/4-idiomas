@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -19,6 +18,8 @@ textarea{min-height:95px}
 .resposta{display:none;margin-top:12px}
 .aviso{color:#a7f3d0;font-size:14px}
 .exemplo{background:#172f48;padding:12px;border-radius:8px}
+.dias{display:flex;gap:8px;flex-wrap:wrap}
+.dias button{flex:1}
 </style>
 </head>
 <body>
@@ -41,6 +42,10 @@ textarea{min-height:95px}
 <h2>📅 Estudo do dia</h2>
 <label for="data">Data</label>
 <input id="data" type="date">
+<div class="dias">
+<button type="button" onclick="mudarDia(-1)">⬅️ Dia anterior</button>
+<button type="button" onclick="mudarDia(1)">Próximo dia ➡️</button>
+</div>
 </section>
 
 <section>
@@ -197,6 +202,14 @@ document.getElementById(id).value=localStorage.getItem(chave(id))||"";
 ["resposta1","resposta2"].forEach(id=>{
 document.getElementById(id).style.display="none";
 });
+}
+
+function mudarDia(diferenca){
+if(!data.value)return;
+const partes=data.value.split("-").map(Number);
+const dia=new Date(partes[0],partes[1]-1,partes[2]+diferenca);
+data.value=dia.getFullYear()+"-"+String(dia.getMonth()+1).padStart(2,"0")+"-"+String(dia.getDate()).padStart(2,"0");
+carregar();
 }
 
 campos.forEach(id=>{
